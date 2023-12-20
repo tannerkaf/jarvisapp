@@ -1,7 +1,7 @@
 let isMuted = false;
 const synth = window.speechSynthesis;
 let userName = localStorage.getItem("jarvis-user-name") || "Guest";
-let selectedVoice = localStorage.getItem("jarvis-selected-voice") || null;
+let selectedVoiceName = localStorage.getItem("jarvis-selected-voice") || "";
 let backgroundColor = localStorage.getItem("jarvis-bg-color") || "#ffffff";
 
 document.body.style.backgroundColor = backgroundColor;
@@ -21,9 +21,8 @@ document.getElementById('apply-settings').addEventListener('click', function() {
     document.body.style.backgroundColor = backgroundColor;
     localStorage.setItem("jarvis-bg-color", backgroundColor);
 
-    const selectedVoiceName = document.getElementById('voice-selection').selectedOptions[0].getAttribute('data-name');
-    selectedVoice = synth.getVoices().find(voice => voice.name === selectedVoiceName).name;
-    localStorage.setItem("jarvis-selected-voice", selectedVoice);
+    selectedVoiceName = document.getElementById('voice-selection').selectedOptions[0].getAttribute('data-name');
+    localStorage.setItem("jarvis-selected-voice", selectedVoiceName);
 
     document.getElementById('menu-panel').style.display = 'none';
 });
@@ -41,6 +40,11 @@ document.getElementById('action-button').addEventListener('click', function() {
     }
 });
 
+document.getElementById('clear-chat').addEventListener('click', function() {
+    clearChat();
+    document.getElementById('menu-panel').style.display = 'none';
+});
+
 function populateVoiceList() {
     var voices = synth.getVoices();
     var voiceSelect = document.getElementById('voice-selection');
@@ -50,7 +54,7 @@ function populateVoiceList() {
         var option = document.createElement('option');
         option.textContent = voice.name + ' (' + voice.lang + ')';
         option.setAttribute('data-name', voice.name);
-        if (voice.name === selectedVoice) {
+        if (voice.name === selectedVoiceName) {
             option.selected = true;
         }
         voiceSelect.appendChild(option);
@@ -115,18 +119,28 @@ function saveConversation(message, sender) {
     localStorage.setItem("jarvis-chat", JSON.stringify(conversation));
 }
 
+function clearChat() {
+    document.getElementById('jarvis-box').innerHTML = '';
+    localStorage.removeItem("jarvis-chat");
+}
+
+function speak(text) {
+    if (synth.speaking || isMuted) return;
+    let utterance = new SpeechSynthesisUtterance(text);
+    let selectedVoice = synth.getVoices().find(voice => voice.name === selectedVoiceName);
+    if (selectedVoice) utterance.voice = selectedVoice;
+    synth.speak(utterance);
+}
+
+window.speechSynthesis.onvoiceschanged = populateVoiceList;
+window.onload = function() {
+    loadConversation();
+    populateVoiceList();
+};
+
 function loadConversation() {
     let conversation = JSON.parse(localStorage.getItem("jarvis-chat") || "[]");
     conversation.forEach(msg => {
         appendMessage(msg.sender, msg.message);
     });
 }
-
-function speak(text) {
-    if (synth.speaking || isMuted) return;
-    let utterance = new SpeechSynthesisUtterance(text);
-    if (selectedVoice) utterance.voice = selectedVoice;
-    synth.speak(utterance);
-}
-
-window.onload = loadConversation;
