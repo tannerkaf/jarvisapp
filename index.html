@@ -3,28 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jarvis Chatbot</title>
-    <link rel="stylesheet" href="style.css"> <!-- Ensure this path is correct -->
+    <title>Jarvis</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Jarvis Chatbot</h1>
-
-    <!-- User Input Section -->
-    <div>
-        <input type="text" id="user-name" placeholder="Enter your name">
-        <button id="set-name">Set Name</button>
-    </div>
+    <h1>Jarvis</h1>
 
     <div id="jarvis-box"></div>
     
     <input type="text" id="user-input" placeholder="Type a message...">
-    <button id="send-button">Send</button>
-    <button id="speak-button">Speak</button>
+    <button id="action-button">Send/Speak</button>
 
-    <!-- Menu Button -->
-    <button id="menu-button">Menu</button>
+    <button id="menu-button" class="menu-button">Menu</button>
 
-    <!-- Menu Options Panel -->
     <div id="menu-panel" class="menu-panel">
         <label for="menu-user-name">Your Name:</label>
         <input type="text" id="menu-user-name" placeholder="Enter your name">
@@ -39,12 +30,6 @@
         <button id="mute-toggle">Mute/Unmute</button>
     </div>
 
-    <!-- Feedback Buttons -->
-    <div id="feedback-buttons" style="display:none;">
-        <button onclick="provideFeedback('good')">👍 Good</button>
-        <button onclick="provideFeedback('bad')">👎 Bad</button>
-    </div>
-
-    <script src="script.js"></script> <!-- Ensure this path is correct -->
+    <script src="script.js"></script>
 </body>
 </html>

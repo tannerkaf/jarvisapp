@@ -87,16 +87,19 @@ button:hover {
     z-index: 100;
 }
 
+.menu-button {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 101;
+}
+
 .menu-panel label,
 .menu-panel select,
 .menu-panel input[type="text"],
 .menu-panel input[type="color"] {
     display: block;
     margin-bottom: 10px;
-}
-
-.menu-panel button {
-    margin-right: 5px;
 }
 
 @keyframes fadeIn {

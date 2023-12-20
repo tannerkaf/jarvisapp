@@ -3,7 +3,6 @@ const synth = window.speechSynthesis;
 let userName = localStorage.getItem("jarvis-user-name") || "Guest";
 let selectedVoice = null;
 
-// Menu and customization logic
 document.getElementById('menu-button').addEventListener('click', function() {
     document.getElementById('menu-panel').style.display = 'block';
     populateVoiceList();
@@ -24,6 +23,14 @@ document.getElementById('mute-toggle').addEventListener('click', function() {
     document.getElementById('mute-toggle').textContent = isMuted ? 'Unmute' : 'Mute';
 });
 
+document.getElementById('action-button').addEventListener('click', function() {
+    if (document.getElementById('user-input').value.trim()) {
+        processUserInput();
+    } else {
+        startSpeechRecognition();
+    }
+});
+
 function populateVoiceList() {
     var voices = synth.getVoices();
     var voiceSelect = document.getElementById('voice-selection');
@@ -37,29 +44,7 @@ function populateVoiceList() {
     });
 }
 
-function speak(text) {
-    if (synth.speaking || isMuted) return;
-    let utterance = new SpeechSynthesisUtterance(text);
-    if (selectedVoice) utterance.voice = selectedVoice;
-    synth.speak(utterance);
-}
-
-window.speechSynthesis.onvoiceschanged = function() {
-    populateVoiceList();
-};
-
-// Chatbot core logic
-document.getElementById('set-name').addEventListener('click', function() {
-    userName = document.getElementById('user-name').value || "Guest";
-    localStorage.setItem("jarvis-user-name", userName);
-    alert(`Name set to ${userName}`);
-});
-
-document.getElementById('send-button').addEventListener('click', function() {
-    processUserInput();
-});
-
-document.getElementById('speak-button').addEventListener('click', function() {
+function startSpeechRecognition() {
     let recognition = new webkitSpeechRecognition();
     recognition.onresult = function(event) {
         let speechInput = event.results[0][0].transcript;
@@ -67,12 +52,7 @@ document.getElementById('speak-button').addEventListener('click', function() {
         processUserInput();
     };
     recognition.start();
-});
-
-document.getElementById('clear-history').addEventListener('click', function() {
-    localStorage.removeItem("jarvis-chat");
-    document.getElementById('jarvis-box').innerHTML = '';
-});
+}
 
 function processUserInput() {
     const userInput = document.getElementById('user-input').value.trim();
@@ -86,7 +66,6 @@ function processUserInput() {
         appendMessage('ai', response);
         saveConversation(response, 'ai');
         speak(response);
-        showFeedbackButtons();
     }
 
     document.getElementById('user-input').value = ''; // Clear input field
@@ -119,13 +98,11 @@ function loadConversation() {
     });
 }
 
-function showFeedbackButtons() {
-    document.getElementById('feedback-buttons').style.display = 'block';
-}
-
-function provideFeedback(feedbackType) {
-    console.log(`Feedback on last response: ${feedbackType}`);
-    document.getElementById('feedback-buttons').style.display = 'none';
+function speak(text) {
+    if (synth.speaking || isMuted) return;
+    let utterance = new SpeechSynthesisUtterance(text);
+    if (selectedVoice) utterance.voice = selectedVoice;
+    synth.speak(utterance);
 }
 
 window.onload = loadConversation;
