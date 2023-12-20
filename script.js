@@ -1,19 +1,29 @@
 let isMuted = false;
 const synth = window.speechSynthesis;
 let userName = localStorage.getItem("jarvis-user-name") || "Guest";
-let selectedVoice = null;
+let selectedVoice = localStorage.getItem("jarvis-selected-voice") || null;
+let backgroundColor = localStorage.getItem("jarvis-bg-color") || "#ffffff";
+
+document.body.style.backgroundColor = backgroundColor;
 
 document.getElementById('menu-button').addEventListener('click', function() {
     document.getElementById('menu-panel').style.display = 'block';
+    document.getElementById('menu-user-name').value = userName;
+    document.getElementById('bg-color').value = backgroundColor;
     populateVoiceList();
 });
 
 document.getElementById('apply-settings').addEventListener('click', function() {
     userName = document.getElementById('menu-user-name').value || userName;
-    document.body.style.backgroundColor = document.getElementById('bg-color').value;
+    localStorage.setItem("jarvis-user-name", userName);
+    
+    backgroundColor = document.getElementById('bg-color').value;
+    document.body.style.backgroundColor = backgroundColor;
+    localStorage.setItem("jarvis-bg-color", backgroundColor);
 
     const selectedVoiceName = document.getElementById('voice-selection').selectedOptions[0].getAttribute('data-name');
-    selectedVoice = synth.getVoices().find(voice => voice.name === selectedVoiceName);
+    selectedVoice = synth.getVoices().find(voice => voice.name === selectedVoiceName).name;
+    localStorage.setItem("jarvis-selected-voice", selectedVoice);
 
     document.getElementById('menu-panel').style.display = 'none';
 });
@@ -40,6 +50,9 @@ function populateVoiceList() {
         var option = document.createElement('option');
         option.textContent = voice.name + ' (' + voice.lang + ')';
         option.setAttribute('data-name', voice.name);
+        if (voice.name === selectedVoice) {
+            option.selected = true;
+        }
         voiceSelect.appendChild(option);
     });
 }
@@ -81,7 +94,18 @@ function appendMessage(sender, message) {
 }
 
 function generateResponse(input) {
-    // Implement your response generation logic here
+    input = input.toLowerCase();
+
+    if (input.includes("hello") || input.includes("hi")) {
+        return `Hello ${userName}! How can I help you?`;
+    }
+    if (input.includes("how are you")) {
+        return `I'm just a chatbot, but I'm doing well, thank you!`;
+    }
+    if (input.includes("your name")) {
+        return `I am Jarvis, your personal assistant chatbot.`;
+    }
+    
     return `I'm not sure how to respond to that, ${userName}. Can you try asking something else?`;
 }
 
