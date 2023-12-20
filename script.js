@@ -1,6 +1,54 @@
+let isMuted = false;
 const synth = window.speechSynthesis;
 let userName = localStorage.getItem("jarvis-user-name") || "Guest";
+let selectedVoice = null;
 
+// Menu and customization logic
+document.getElementById('menu-button').addEventListener('click', function() {
+    document.getElementById('menu-panel').style.display = 'block';
+    populateVoiceList();
+});
+
+document.getElementById('apply-settings').addEventListener('click', function() {
+    userName = document.getElementById('menu-user-name').value || userName;
+    document.body.style.backgroundColor = document.getElementById('bg-color').value;
+
+    const selectedVoiceName = document.getElementById('voice-selection').selectedOptions[0].getAttribute('data-name');
+    selectedVoice = synth.getVoices().find(voice => voice.name === selectedVoiceName);
+
+    document.getElementById('menu-panel').style.display = 'none';
+});
+
+document.getElementById('mute-toggle').addEventListener('click', function() {
+    isMuted = !isMuted;
+    document.getElementById('mute-toggle').textContent = isMuted ? 'Unmute' : 'Mute';
+});
+
+function populateVoiceList() {
+    var voices = synth.getVoices();
+    var voiceSelect = document.getElementById('voice-selection');
+    voiceSelect.innerHTML = '';
+
+    voices.forEach(voice => {
+        var option = document.createElement('option');
+        option.textContent = voice.name + ' (' + voice.lang + ')';
+        option.setAttribute('data-name', voice.name);
+        voiceSelect.appendChild(option);
+    });
+}
+
+function speak(text) {
+    if (synth.speaking || isMuted) return;
+    let utterance = new SpeechSynthesisUtterance(text);
+    if (selectedVoice) utterance.voice = selectedVoice;
+    synth.speak(utterance);
+}
+
+window.speechSynthesis.onvoiceschanged = function() {
+    populateVoiceList();
+};
+
+// Chatbot core logic
 document.getElementById('set-name').addEventListener('click', function() {
     userName = document.getElementById('user-name').value || "Guest";
     localStorage.setItem("jarvis-user-name", userName);
@@ -54,33 +102,7 @@ function appendMessage(sender, message) {
 }
 
 function generateResponse(input) {
-    input = input.toLowerCase();
-
-    if (input.includes("hello") || input.includes("hi")) {
-        return `Hello ${userName}! How can I assist you today?`;
-    }
-
-    if (input.includes("how") && input.includes("you")) {
-        return `I'm just a program, so I'm always operating at optimal efficiency, ${userName}!`;
-    }
-
-    if (input.includes("weather")) {
-        return `I'm not currently connected to weather services, ${userName}, but it's always a good idea to carry an umbrella!`;
-    }
-
-    if (input.includes("joke")) {
-        const jokes = [
-            "Why don't scientists trust atoms? Because they make up everything!",
-            "Why did the scarecrow win an award? Because he was outstanding in his field!",
-            "Why don't eggs tell jokes? They'd crack each other up."
-        ];
-        return jokes[Math.floor(Math.random() * jokes.length)];
-    }
-
-    if (input.includes("bye") || input.includes("goodbye")) {
-        return `Goodbye ${userName}! Have a great day!`;
-    }
-
+    // Implement your response generation logic here
     return `I'm not sure how to respond to that, ${userName}. Can you try asking something else?`;
 }
 
@@ -95,15 +117,6 @@ function loadConversation() {
     conversation.forEach(msg => {
         appendMessage(msg.sender, msg.message);
     });
-}
-
-function speak(text) {
-    if (synth.speaking) {
-        console.error('SpeechSynthesis is already speaking.');
-        return;
-    }
-    let utterance = new SpeechSynthesisUtterance(text);
-    synth.speak(utterance);
 }
 
 function showFeedbackButtons() {

@@ -29,7 +29,7 @@ h1 {
     position: relative;
 }
 
-#user-input, #user-name {
+input[type="text"] {
     width: 70%;
     padding: 10px;
     margin-top: 10px;
@@ -39,7 +39,7 @@ h1 {
     font-size: 16px;
 }
 
-#send-button, #speak-button, #set-name, #clear-history {
+button {
     padding: 10px 20px;
     margin-top: 10px;
     background-color: #0f9b0f;
@@ -50,7 +50,7 @@ h1 {
     box-shadow: 0 0 5px #0f9b0f;
 }
 
-#send-button:hover, #speak-button:hover, #set-name:hover, #clear-history:hover {
+button:hover {
     background-color: #0fa90f;
     box-shadow: 0 0 15px #0fa90f;
 }
@@ -59,17 +59,14 @@ h1 {
     margin: 5px;
     padding: 5px;
     border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    text-align: left;
     animation: fadeIn 0.5s ease-out;
 }
 
 .user-message {
-    background-color: rgba(15, 155, 15, 0.3);
     text-align: right;
-}
-
-.ai-message {
-    background-color: rgba(255, 255, 255, 0.1);
-    text-align: left;
+    background-color: rgba(15, 155, 15, 0.3);
 }
 
 .timestamp {
@@ -77,22 +74,29 @@ h1 {
     color: #bbb;
 }
 
-#feedback-buttons {
-    margin-top: 10px;
+.menu-panel {
+    display: none;
+    position: fixed;
+    right: 10px;
+    top: 10px;
+    background-color: white;
+    color: black;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 100;
 }
 
-#feedback-buttons button {
-    background-color: #0f9b0f;
-    color: white;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    padding: 5px 10px;
-    margin: 0 5px;
+.menu-panel label,
+.menu-panel select,
+.menu-panel input[type="text"],
+.menu-panel input[type="color"] {
+    display: block;
+    margin-bottom: 10px;
 }
 
-#feedback-buttons button:hover {
-    background-color: #0fa90f;
+.menu-panel button {
+    margin-right: 5px;
 }
 
 @keyframes fadeIn {
