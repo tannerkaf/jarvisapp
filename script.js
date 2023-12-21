@@ -1,146 +1,110 @@
 let isMuted = false;
 const synth = window.speechSynthesis;
 let userName = localStorage.getItem("jarvis-user-name") || "Guest";
-let selectedVoiceName = localStorage.getItem("jarvis-selected-voice") || "";
+let selectedVoice = localStorage.getItem("jarvis-selected-voice");
 let backgroundColor = localStorage.getItem("jarvis-bg-color") || "#ffffff";
 
 document.body.style.backgroundColor = backgroundColor;
 
-document.getElementById('menu-button').addEventListener('click', function() {
-    document.getElementById('menu-panel').style.display = 'block';
-    document.getElementById('menu-user-name').value = userName;
-    document.getElementById('bg-color').value = backgroundColor;
-    populateVoiceList();
-});
-
-document.getElementById('apply-settings').addEventListener('click', function() {
-    userName = document.getElementById('menu-user-name').value || userName;
-    localStorage.setItem("jarvis-user-name", userName);
-    
-    backgroundColor = document.getElementById('bg-color').value;
-    document.body.style.backgroundColor = backgroundColor;
-    localStorage.setItem("jarvis-bg-color", backgroundColor);
-
-    selectedVoiceName = document.getElementById('voice-selection').selectedOptions[0].getAttribute('data-name');
-    localStorage.setItem("jarvis-selected-voice", selectedVoiceName);
-
-    document.getElementById('menu-panel').style.display = 'none';
-});
-
-document.getElementById('mute-toggle').addEventListener('click', function() {
-    isMuted = !isMuted;
-    document.getElementById('mute-toggle').textContent = isMuted ? 'Unmute' : 'Mute';
-});
-
 document.getElementById('action-button').addEventListener('click', function() {
-    if (document.getElementById('user-input').value.trim()) {
-        processUserInput();
+    const userInputField = document.getElementById('user-input');
+    if (userInputField.value.trim()) {
+        processUserInput(userInputField.value);
+        userInputField.value = '';
     } else {
         startSpeechRecognition();
     }
 });
 
-document.getElementById('clear-chat').addEventListener('click', function() {
-    clearChat();
-    document.getElementById('menu-panel').style.display = 'none';
-});
-
-function populateVoiceList() {
-    var voices = synth.getVoices();
-    var voiceSelect = document.getElementById('voice-selection');
-    voiceSelect.innerHTML = '';
-
-    voices.forEach(voice => {
-        var option = document.createElement('option');
-        option.textContent = voice.name + ' (' + voice.lang + ')';
-        option.setAttribute('data-name', voice.name);
-        if (voice.name === selectedVoiceName) {
-            option.selected = true;
-        }
-        voiceSelect.appendChild(option);
-    });
-}
-
 function startSpeechRecognition() {
-    let recognition = new webkitSpeechRecognition();
-    recognition.onresult = function(event) {
-        let speechInput = event.results[0][0].transcript;
-        document.getElementById('user-input').value = speechInput;
-        processUserInput();
-    };
+    let recognition = new window.webkitSpeechRecognition();
+    recognition.lang = 'en-US';
     recognition.start();
+
+    recognition.onresult = function(event) {
+        let speechResult = event.results[0][0].transcript;
+        processUserInput(speechResult);
+    };
+
+    recognition.onerror = function(event) {
+        console.error('Speech recognition error:', event.error);
+    };
 }
 
-function processUserInput() {
-    const userInput = document.getElementById('user-input').value.trim();
-    if (!userInput) return;
+function processUserInput(inputText) {
+    appendMessage('user', inputText);
+    let botResponse = generateBotResponse(inputText);
+    appendMessage('jarvis', botResponse);
+    if (!isMuted) {
+        speak(botResponse);
+    }
+}
 
-    appendMessage('user', userInput);
-    saveConversation(userInput, 'user');
+function generateBotResponse(input) {
+    input = input.toLowerCase();
 
-    const response = generateResponse(userInput);
-    if (response) {
-        appendMessage('ai', response);
-        saveConversation(response, 'ai');
-        speak(response);
+    // Expanded Greetings
+    if (input.includes("hello") || input.includes("hi")) {
+        const greetings = [
+            `Hello ${userName}! How can I assist you today?`,
+            `Hi ${userName}! What can I do for you?`,
+            `Hey there ${userName}! Need any help?`,
+            `Greetings, ${userName}! How can I serve you today?`,
+            `Good day, ${userName}! What are you up to?`
+        ];
+        return greetings[Math.floor(Math.random() * greetings.length)];
     }
 
-    document.getElementById('user-input').value = ''; // Clear input field
+    // Responses about the Chatbot
+    if (input.includes("how are you")) {
+        return `I'm just a chatbot, but I'm doing well, thank you!`;
+    } else if (input.includes("your name")) {
+        return `I am Jarvis, your personal assistant chatbot.`;
+    }
+
+    // Expanded Jokes
+    if (input.includes("tell me a joke")) {
+        const jokes = [
+            `Why don't scientists trust atoms? Because they make up everything!`,
+            `What do you call fake spaghetti? An impasta!`,
+            `Why was the math book sad? It had too many problems.`,
+            `How does a penguin build its house? Igloos it together!`,
+            `Why don't eggs tell jokes? They'd crack each other up!`
+        ];
+        return jokes[Math.floor(Math.random() * jokes.length)];
+    }
+
+    // Expanded Fallback Responses
+    const fallbacks = [
+        `I'm not sure how to respond to that, ${userName}. Can you try asking something else?`,
+        `Hmm, I don't have an answer to that, ${userName}. Let's try a different question.`,
+        `I'm still learning, ${userName}, and I'm not sure how to answer that.`,
+        `That's a tough one, ${userName}. Maybe ask me something else?`,
+        `I'm afraid I don't have the information on that, ${userName}. Try asking me something else.`
+    ];
+    return fallbacks[Math.floor(Math.random() * fallbacks.length)];
 }
 
 function appendMessage(sender, message) {
-    const jarvisBox = document.getElementById('jarvis-box');
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
-    const timestamp = new Date().toLocaleTimeString();
-    messageDiv.innerHTML = `<strong>${sender === 'user' ? 'You' : 'Jarvis'}:</strong> ${message} <span class="timestamp">(${timestamp})</span>`;
-    jarvisBox.appendChild(messageDiv);
-}
-
-function generateResponse(input) {
-    input = input.toLowerCase();
-
-    if (input.includes("hello") || input.includes("hi")) {
-        return `Hello ${userName}! How can I help you?`;
-    }
-    if (input.includes("how are you")) {
-        return `I'm just a chatbot, but I'm doing well, thank you!`;
-    }
-    if (input.includes("your name")) {
-        return `I am Jarvis, your personal assistant chatbot.`;
-    }
-    
-    return `I'm not sure how to respond to that, ${userName}. Can you try asking something else?`;
-}
-
-function saveConversation(message, sender) {
-    let conversation = JSON.parse(localStorage.getItem("jarvis-chat") || "[]");
-    conversation.push({ message, sender, timestamp: new Date().toISOString() });
-    localStorage.setItem("jarvis-chat", JSON.stringify(conversation));
-}
-
-function clearChat() {
-    document.getElementById('jarvis-box').innerHTML = '';
-    localStorage.removeItem("jarvis-chat");
+    const chatBox = document.getElementById('jarvis-box');
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('message', sender);
+    messageElement.textContent = `${sender === 'user' ? 'You' : 'Jarvis'}: ${message}`;
+    chatBox.appendChild(messageElement);
 }
 
 function speak(text) {
-    if (synth.speaking || isMuted) return;
     let utterance = new SpeechSynthesisUtterance(text);
-    let selectedVoice = synth.getVoices().find(voice => voice.name === selectedVoiceName);
-    if (selectedVoice) utterance.voice = selectedVoice;
+    if (selectedVoice) {
+        utterance.voice = synth.getVoices().find(voice => voice.name === selectedVoice);
+    }
     synth.speak(utterance);
 }
 
-window.speechSynthesis.onvoiceschanged = populateVoiceList;
-window.onload = function() {
-    loadConversation();
-    populateVoiceList();
+window.onload = () => {
+    if (selectedVoice) {
+        synth.onvoiceschanged = () => {
+            utterance.voice = synth.getVoices().find(voice => voice.name === selectedVoice);
+        };
+    }
 };
-
-function loadConversation() {
-    let conversation = JSON.parse(localStorage.getItem("jarvis-chat") || "[]");
-    conversation.forEach(msg => {
-        appendMessage(msg.sender, msg.message);
-    });
-}

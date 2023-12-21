@@ -3,19 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jarvis</title>
+    <title>Jarvis Chatbot</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Jarvis</h1>
-
-    <div id="jarvis-box"></div>
+    <h1>Jarvis Chatbot</h1>
+    
+    <!-- Chat Interface -->
+    <div id="jarvis-box" class="chat-box"></div>
     
     <input type="text" id="user-input" placeholder="Type a message...">
-    <button id="action-button">Send/Speak</button>
+    <button id="send-button">Send</button>
+    <button id="speak-button">Speak</button>
 
+    <!-- Navigation to Object Detection -->
+    <button onclick="window.location.href='object-detection.html'">Object Detection</button>
+
+    <!-- Menu Button -->
     <button id="menu-button" class="menu-button">Menu</button>
 
+    <!-- Menu Options Panel -->
     <div id="menu-panel" class="menu-panel">
         <label for="menu-user-name">Your Name:</label>
         <input type="text" id="menu-user-name" placeholder="Enter your name">
@@ -28,7 +35,6 @@
         
         <button id="apply-settings">Apply Settings</button>
         <button id="mute-toggle">Mute/Unmute</button>
-        <button id="clear-chat">Clear Chat</button>
     </div>
 
     <script src="script.js"></script>

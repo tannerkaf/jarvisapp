@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object Detection - Jarvis</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+</head>
+<body>
+    <h1>Object Detection</h1>
+
+    <div id="webcam-container">
+        <video id="webcam" autoplay playsinline></video>
+        <canvas id="canvas" style="position: absolute;"></canvas>
+    </div>
+
+    <button id="flip-camera">Flip Camera</button>
+    <button id="toggle-camera">Toggle Front/Back Camera</button>
+    <button onclick="window.location.href='index.html'">Return to Chatbot</button>
+
+    <script src="object-detection.js"></script>
+</body>
+</html>
