@@ -8,35 +8,14 @@
 </head>
 <body>
     <h1>Jarvis Chatbot</h1>
-    
-    <!-- Chat Interface -->
     <div id="jarvis-box" class="chat-box"></div>
-    
     <input type="text" id="user-input" placeholder="Type a message...">
-    <button id="send-button">Send</button>
-    <button id="speak-button">Speak</button>
-
-    <!-- Navigation to Object Detection -->
+    <button id="action-button">Send/Speak</button>
     <button onclick="window.location.href='object-detection.html'">Object Detection</button>
-
-    <!-- Menu Button -->
     <button id="menu-button" class="menu-button">Menu</button>
-
-    <!-- Menu Options Panel -->
     <div id="menu-panel" class="menu-panel">
-        <label for="menu-user-name">Your Name:</label>
-        <input type="text" id="menu-user-name" placeholder="Enter your name">
-        
-        <label for="voice-selection">Voice Selection:</label>
-        <select id="voice-selection"></select>
-        
-        <label for="bg-color">Background Color:</label>
-        <input type="color" id="bg-color" value="#ffffff">
-        
-        <button id="apply-settings">Apply Settings</button>
-        <button id="mute-toggle">Mute/Unmute</button>
+        <!-- Menu Panel Content -->
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>

@@ -23,7 +23,11 @@ function startSpeechRecognition() {
 
     recognition.onresult = function(event) {
         let speechResult = event.results[0][0].transcript;
-        processUserInput(speechResult);
+        if (speechResult.toLowerCase().includes("what is this")) {
+            window.location.href = 'object-detection.html';
+        } else {
+            processUserInput(speechResult);
+        }
     };
 
     recognition.onerror = function(event) {
@@ -43,46 +47,17 @@ function processUserInput(inputText) {
 function generateBotResponse(input) {
     input = input.toLowerCase();
 
-    // Expanded Greetings
     if (input.includes("hello") || input.includes("hi")) {
-        const greetings = [
-            `Hello ${userName}! How can I assist you today?`,
-            `Hi ${userName}! What can I do for you?`,
-            `Hey there ${userName}! Need any help?`,
-            `Greetings, ${userName}! How can I serve you today?`,
-            `Good day, ${userName}! What are you up to?`
-        ];
-        return greetings[Math.floor(Math.random() * greetings.length)];
-    }
-
-    // Responses about the Chatbot
-    if (input.includes("how are you")) {
+        return `Hello ${userName}! How can I assist you today?`;
+    } else if (input.includes("how are you")) {
         return `I'm just a chatbot, but I'm doing well, thank you!`;
     } else if (input.includes("your name")) {
         return `I am Jarvis, your personal assistant chatbot.`;
+    } else if (input.includes("tell me a joke")) {
+        return `Why don't scientists trust atoms? Because they make up everything!`;
+    } else {
+        return `I'm not sure how to respond to that, ${userName}. Can you try asking something else?`;
     }
-
-    // Expanded Jokes
-    if (input.includes("tell me a joke")) {
-        const jokes = [
-            `Why don't scientists trust atoms? Because they make up everything!`,
-            `What do you call fake spaghetti? An impasta!`,
-            `Why was the math book sad? It had too many problems.`,
-            `How does a penguin build its house? Igloos it together!`,
-            `Why don't eggs tell jokes? They'd crack each other up!`
-        ];
-        return jokes[Math.floor(Math.random() * jokes.length)];
-    }
-
-    // Expanded Fallback Responses
-    const fallbacks = [
-        `I'm not sure how to respond to that, ${userName}. Can you try asking something else?`,
-        `Hmm, I don't have an answer to that, ${userName}. Let's try a different question.`,
-        `I'm still learning, ${userName}, and I'm not sure how to answer that.`,
-        `That's a tough one, ${userName}. Maybe ask me something else?`,
-        `I'm afraid I don't have the information on that, ${userName}. Try asking me something else.`
-    ];
-    return fallbacks[Math.floor(Math.random() * fallbacks.length)];
 }
 
 function appendMessage(sender, message) {
