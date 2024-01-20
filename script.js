@@ -21,6 +21,18 @@ document.getElementById('user-input').addEventListener('keypress', function(even
     }
 });
 
+document.getElementById('start-speech-recognition').addEventListener('click', function() {
+    var recognition = new webkitSpeechRecognition();
+    recognition.lang = 'en-US';
+
+    recognition.onresult = function(event) {
+        var speechResult = event.results[0][0].transcript;
+        document.getElementById('user-input').value = speechResult;
+    };
+
+    recognition.start();
+});
+
 function processUserInput(userInput) {
     showLoadingIndicator(true);
     fetch('http://127.0.0.1:5000/get_response', {
@@ -66,4 +78,4 @@ function speak(text) {
     synth.speak(utterance);
 }
 
-// Add additional functionalities (e.g., menu options) here
+// Additional functionalities and handlers can be added here
