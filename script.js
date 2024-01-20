@@ -72,9 +72,18 @@ function appendMessage(sender, message) {
 
 function speak(text) {
     let utterance = new SpeechSynthesisUtterance(text);
-    if (selectedVoice) {
-        utterance.voice = synth.getVoices().find(voice => voice.name === selectedVoice);
+
+    // Retrieve available voices and filter for male British voice
+    let voices = window.speechSynthesis.getVoices();
+    let britishMaleVoice = voices.find(voice => voice.lang === 'en-GB' && voice.gender === 'male');
+
+    if (britishMaleVoice) {
+        utterance.voice = britishMaleVoice;
+    } else if (selectedVoice) {
+        // Fallback to the selected voice if British male voice isn't available
+        utterance.voice = voices.find(voice => voice.name === selectedVoice);
     }
+
     synth.speak(utterance);
 }
 
