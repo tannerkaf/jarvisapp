@@ -1,24 +1,38 @@
 let isMuted = false;
 const synth = window.speechSynthesis;
 let userName = localStorage.getItem("jarvis-user-name") || "Guest";
+let selectedVoice = localStorage.getItem("jarvis-selected-voice");
 let backgroundColor = localStorage.getItem("jarvis-bg-color") || "#ffffff";
 document.body.style.backgroundColor = backgroundColor;
 
-function speak(text) {
-    synth.cancel(); // Stop any ongoing speech
-
-    let utterance = new SpeechSynthesisUtterance(text);
+function populateVoiceList() {
     let voices = synth.getVoices();
-    let ryanVoice = voices.find(voice => voice.name === 'Microsoft Ryan UK English');
+    let voiceSelect = document.getElementById('voice-selection');
+    voiceSelect.innerHTML = '';
 
-    if (ryanVoice) {
-        utterance.voice = ryanVoice;
-    } else {
-        console.warn('Microsoft Ryan UK English voice not found. Using default voice.');
-    }
+    voices.forEach(voice => {
+        let option = document.createElement('option');
+        option.textContent = voice.name + ' (' + voice.lang + ')';
+        
+        if (voice.name === selectedVoice) {
+            option.selected = true;
+        }
 
-    synth.speak(utterance);
+        option.setAttribute('data-lang', voice.lang);
+        option.setAttribute('data-name', voice.name);
+        voiceSelect.appendChild(option);
+    });
 }
+
+populateVoiceList();
+if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = populateVoiceList;
+}
+
+document.getElementById('voice-selection').addEventListener('change', function() {
+    selectedVoice = this.selectedOptions[0].getAttribute('data-name');
+    localStorage.setItem("jarvis-selected-voice", selectedVoice);
+});
 
 document.getElementById('action-button').addEventListener('click', function() {
     const userInputField = document.getElementById('user-input');
@@ -87,4 +101,13 @@ function appendMessage(sender, message) {
     messageElement.textContent = `${sender === 'user' ? 'You' : 'Jarvis'}: ${message}`;
     chatBox.appendChild(messageElement);
     chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function speak(text) {
+    synth.cancel(); // Stop any ongoing speech
+
+    let utterance = new SpeechSynthesisUtterance(text);
+    utterance.voice = synth.getVoices().find(voice => voice.name === selectedVoice) || synth.getVoices()[0];
+
+    synth.speak(utterance);
 }
