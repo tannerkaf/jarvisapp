@@ -4,28 +4,20 @@ let userName = localStorage.getItem("jarvis-user-name") || "Guest";
 let backgroundColor = localStorage.getItem("jarvis-bg-color") || "#ffffff";
 document.body.style.backgroundColor = backgroundColor;
 
-function populateVoiceList() {
+function speak(text) {
+    synth.cancel(); // Stop any ongoing speech
+
+    let utterance = new SpeechSynthesisUtterance(text);
     let voices = synth.getVoices();
-    let voiceSelect = document.getElementById('voice-selection');
-    voiceSelect.innerHTML = '';
+    let ryanVoice = voices.find(voice => voice.name === 'Microsoft Ryan UK English');
 
-    voices.forEach(voice => {
-        let option = document.createElement('option');
-        option.textContent = voice.name + ' (' + voice.lang + ')';
-        
-        if (voice.default) {
-            option.textContent += ' -- DEFAULT';
-        }
+    if (ryanVoice) {
+        utterance.voice = ryanVoice;
+    } else {
+        console.warn('Microsoft Ryan UK English voice not found. Using default voice.');
+    }
 
-        option.setAttribute('data-lang', voice.lang);
-        option.setAttribute('data-name', voice.name);
-        voiceSelect.appendChild(option);
-    });
-}
-
-populateVoiceList();
-if (speechSynthesis.onvoiceschanged !== undefined) {
-    speechSynthesis.onvoiceschanged = populateVoiceList;
+    synth.speak(utterance);
 }
 
 document.getElementById('action-button').addEventListener('click', function() {
@@ -54,6 +46,10 @@ document.getElementById('start-speech-recognition').addEventListener('click', fu
     };
 
     recognition.start();
+});
+
+document.getElementById('stop-speech').addEventListener('click', function() {
+    synth.cancel(); // Stops the speech synthesis
 });
 
 function processUserInput(userInput) {
@@ -91,12 +87,4 @@ function appendMessage(sender, message) {
     messageElement.textContent = `${sender === 'user' ? 'You' : 'Jarvis'}: ${message}`;
     chatBox.appendChild(messageElement);
     chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-function speak(text) {
-    let utterance = new SpeechSynthesisUtterance(text);
-    let selectedOption = document.getElementById('voice-selection').selectedOptions[0].getAttribute('data-name');
-    utterance.voice = synth.getVoices().find(voice => voice.name === selectedOption);
-
-    synth.speak(utterance);
 }
