@@ -1,9 +1,32 @@
 let isMuted = false;
 const synth = window.speechSynthesis;
 let userName = localStorage.getItem("jarvis-user-name") || "Guest";
-let selectedVoice = localStorage.getItem("jarvis-selected-voice");
 let backgroundColor = localStorage.getItem("jarvis-bg-color") || "#ffffff";
 document.body.style.backgroundColor = backgroundColor;
+
+function populateVoiceList() {
+    let voices = synth.getVoices();
+    let voiceSelect = document.getElementById('voice-selection');
+    voiceSelect.innerHTML = '';
+
+    voices.forEach(voice => {
+        let option = document.createElement('option');
+        option.textContent = voice.name + ' (' + voice.lang + ')';
+        
+        if (voice.default) {
+            option.textContent += ' -- DEFAULT';
+        }
+
+        option.setAttribute('data-lang', voice.lang);
+        option.setAttribute('data-name', voice.name);
+        voiceSelect.appendChild(option);
+    });
+}
+
+populateVoiceList();
+if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = populateVoiceList;
+}
 
 document.getElementById('action-button').addEventListener('click', function() {
     const userInputField = document.getElementById('user-input');
@@ -72,19 +95,8 @@ function appendMessage(sender, message) {
 
 function speak(text) {
     let utterance = new SpeechSynthesisUtterance(text);
-
-    // Retrieve available voices and filter for male British voice
-    let voices = window.speechSynthesis.getVoices();
-    let britishMaleVoice = voices.find(voice => voice.lang === 'en-GB' && voice.gender === 'male');
-
-    if (britishMaleVoice) {
-        utterance.voice = britishMaleVoice;
-    } else if (selectedVoice) {
-        // Fallback to the selected voice if British male voice isn't available
-        utterance.voice = voices.find(voice => voice.name === selectedVoice);
-    }
+    let selectedOption = document.getElementById('voice-selection').selectedOptions[0].getAttribute('data-name');
+    utterance.voice = synth.getVoices().find(voice => voice.name === selectedOption);
 
     synth.speak(utterance);
 }
-
-// Additional functionalities and handlers can be added here
