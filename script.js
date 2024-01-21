@@ -24,9 +24,7 @@ function populateVoiceList() {
 }
 
 // Initialize voice list after the synth is loaded
-window.speechSynthesis.onvoiceschanged = () => {
-    populateVoiceList();
-};
+window.speechSynthesis.onvoiceschanged = populateVoiceList;
 
 document.getElementById('voice-selection').addEventListener('change', function() {
     selectedVoice = this.selectedOptions[0].getAttribute('data-name');
@@ -37,7 +35,8 @@ function speak(text) {
     synth.cancel(); // Stop any ongoing speech
 
     let utterance = new SpeechSynthesisUtterance(text);
-    utterance.voice = synth.getVoices().find(voice => voice.name === selectedVoice);
+    let voiceName = selectedVoice || 'Google UK English Male'; // Default to Google UK English Male if no selection
+    utterance.voice = synth.getVoices().find(voice => voice.name === voiceName);
 
     synth.speak(utterance);
 }
