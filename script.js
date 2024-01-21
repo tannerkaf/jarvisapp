@@ -1,7 +1,7 @@
 let isMuted = false;
 const synth = window.speechSynthesis;
 let userName = localStorage.getItem("jarvis-user-name") || "Guest";
-let selectedVoice = localStorage.getItem("jarvis-selected-voice");
+let selectedVoice = localStorage.getItem("jarvis-selected-voice") || '';
 let backgroundColor = localStorage.getItem("jarvis-bg-color") || "#ffffff";
 document.body.style.backgroundColor = backgroundColor;
 
@@ -18,21 +18,29 @@ function populateVoiceList() {
             option.selected = true;
         }
 
-        option.setAttribute('data-lang', voice.lang);
         option.setAttribute('data-name', voice.name);
         voiceSelect.appendChild(option);
     });
 }
 
-populateVoiceList();
-if (speechSynthesis.onvoiceschanged !== undefined) {
-    speechSynthesis.onvoiceschanged = populateVoiceList;
-}
+// Initialize voice list after the synth is loaded
+window.speechSynthesis.onvoiceschanged = () => {
+    populateVoiceList();
+};
 
 document.getElementById('voice-selection').addEventListener('change', function() {
     selectedVoice = this.selectedOptions[0].getAttribute('data-name');
     localStorage.setItem("jarvis-selected-voice", selectedVoice);
 });
+
+function speak(text) {
+    synth.cancel(); // Stop any ongoing speech
+
+    let utterance = new SpeechSynthesisUtterance(text);
+    utterance.voice = synth.getVoices().find(voice => voice.name === selectedVoice);
+
+    synth.speak(utterance);
+}
 
 document.getElementById('action-button').addEventListener('click', function() {
     const userInputField = document.getElementById('user-input');
@@ -50,15 +58,15 @@ document.getElementById('user-input').addEventListener('keypress', function(even
     }
 });
 
+var recognition = new webkitSpeechRecognition();
+recognition.lang = 'en-US';
+
+recognition.onresult = function(event) {
+    var speechResult = event.results[0][0].transcript;
+    document.getElementById('user-input').value = speechResult;
+};
+
 document.getElementById('start-speech-recognition').addEventListener('click', function() {
-    var recognition = new webkitSpeechRecognition();
-    recognition.lang = 'en-US';
-
-    recognition.onresult = function(event) {
-        var speechResult = event.results[0][0].transcript;
-        document.getElementById('user-input').value = speechResult;
-    };
-
     recognition.start();
 });
 
@@ -101,13 +109,4 @@ function appendMessage(sender, message) {
     messageElement.textContent = `${sender === 'user' ? 'You' : 'Jarvis'}: ${message}`;
     chatBox.appendChild(messageElement);
     chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-function speak(text) {
-    synth.cancel(); // Stop any ongoing speech
-
-    let utterance = new SpeechSynthesisUtterance(text);
-    utterance.voice = synth.getVoices().find(voice => voice.name === selectedVoice) || synth.getVoices()[0];
-
-    synth.speak(utterance);
 }
