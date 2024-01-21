@@ -1,9 +1,25 @@
 let isMuted = false;
 const synth = window.speechSynthesis;
+let selectedVoiceName = localStorage.getItem('jarvis-selected-voice') || 'Google UK English Male'; // Default voice
+
+// Function to populate voice selection dropdown
+function populateVoiceList() {
+    const voices = synth.getVoices();
+    const voiceSelect = document.getElementById('voice-select'); // Your dropdown ID
+
+    voices.forEach(voice => {
+        const option = document.createElement('option');
+        option.textContent = voice.name + ' (' + voice.lang + ')';
+        if (voice.name === selectedVoiceName) {
+            option.selected = true;
+        }
+        voiceSelect.appendChild(option);
+    });
+}
 
 // Function to append messages to the chat
 function appendMessage(sender, message) {
-    const chatBox = document.getElementById('jarvis-box');
+    const chatBox = document.getElementById('jarvis-box'); // Your chat display element ID
     const messageElement = document.createElement('div');
     messageElement.classList.add('message', sender);
     messageElement.textContent = `${sender === 'user' ? 'You' : 'Jarvis'}: ${message}`;
@@ -14,9 +30,19 @@ function appendMessage(sender, message) {
 // Function to handle text-to-speech
 function speak(text) {
     if (isMuted) return;
-    let utterance = new SpeechSynthesisUtterance(text);
+    const utterance = new SpeechSynthesisUtterance(text);
+    const selectedVoice = synth.getVoices().find(voice => voice.name === selectedVoiceName);
+    if (selectedVoice) {
+        utterance.voice = selectedVoice;
+    }
     synth.speak(utterance);
 }
+
+// Event listener for voice selection change
+document.getElementById('voice-select').addEventListener('change', function() {
+    selectedVoiceName = this.value;
+    localStorage.setItem('jarvis-selected-voice', selectedVoiceName);
+});
 
 // Function to fetch weather data from the Flask backend
 function getWeather(city) {
@@ -40,27 +66,13 @@ function getWeather(city) {
 // Function to process user input
 function processUserInput(userInput) {
     appendMessage('user', userInput);
-
-    if (userInput.toLowerCase().startsWith('weather ')) {
-        const city = userInput.substring(8); // Extract city name
-        getWeather(city); // Fetch and display weather
+    
+    if (userInput.toLowerCase().includes('weather')) {
+        const cityMatch = userInput.match(/weather in (\w+)/i);
+        const city = cityMatch ? cityMatch[1] : 'London'; // Default city
+        getWeather(city);
     } else {
-        fetch('http://127.0.0.1:5000/get_response', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ user_input: userInput })
-        })
-        .then(response => response.json())
-        .then(data => {
-            appendMessage('jarvis', data.message);
-            speak(data.message);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            appendMessage('jarvis', 'Sorry, there was an error processing your request.');
-        });
+        // Your existing code for other requests...
     }
 }
 
@@ -81,3 +93,6 @@ document.getElementById('user-input').addEventListener('keypress', function(even
         document.getElementById('action-button').click();
     }
 });
+
+// Populate the voice list when the speechSynthesis voices change
+synth.onvoiceschanged = populateVoiceList;
