@@ -1,6 +1,18 @@
 let isMuted = false;
 const synth = window.speechSynthesis;
 
+// Function to populate voice selection dropdown
+function populateVoiceList() {
+    const voices = synth.getVoices();
+    const voiceSelect = document.getElementById('voice-selection');
+    voiceSelect.innerHTML = '';
+    voices.forEach(voice => {
+        const option = document.createElement('option');
+        option.textContent = voice.name;
+        voiceSelect.appendChild(option);
+    });
+}
+
 // Function to append messages to the chat
 function appendMessage(sender, message) {
     const chatBox = document.getElementById('jarvis-box');
@@ -15,31 +27,17 @@ function appendMessage(sender, message) {
 function speak(text) {
     if (isMuted) return;
     let utterance = new SpeechSynthesisUtterance(text);
+    const selectedVoice = synth.getVoices().find(voice => voice.name === document.getElementById('voice-selection').value);
+    if (selectedVoice) {
+        utterance.voice = selectedVoice;
+    }
     synth.speak(utterance);
 }
-
-// Event listener for user input
-document.getElementById('action-button').addEventListener('click', function() {
-    const userInputField = document.getElementById('user-input');
-    const userText = userInputField.value.trim();
-    if (userText) {
-        processUserInput(userText);
-        userInputField.value = '';
-    }
-});
-
-// Listen for Enter key in the text input
-document.getElementById('user-input').addEventListener('keypress', function(event) {
-    if (event.key === 'Enter') {
-        event.preventDefault();
-        document.getElementById('action-button').click();
-    }
-});
 
 // Function to process user input
 function processUserInput(userInput) {
     appendMessage('user', userInput);
-    
+
     if (userInput.toLowerCase().includes('weather')) {
         const city = userInput.split(' ').slice(1).join(' ');
         getWeather(city);
@@ -48,9 +46,9 @@ function processUserInput(userInput) {
     }
 }
 
-// Function to fetch weather data from the Flask backend
+// Fetch weather data from Flask backend
 function getWeather(city) {
-    fetch(`http://localhost:5000/weather?city=${encodeURIComponent(city)}`) // Adjust if your Flask app is on a different URL
+    fetch(`http://localhost:5000/weather?city=${encodeURIComponent(city)}`)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
@@ -67,7 +65,7 @@ function getWeather(city) {
         });
 }
 
-// Function to send input to OpenAI API through the Flask backend
+// Send input to OpenAI API through Flask backend
 function sendToOpenAI(userInput) {
     fetch('http://localhost:5000/get_response', {
         method: 'POST',
@@ -86,3 +84,45 @@ function sendToOpenAI(userInput) {
         appendMessage('jarvis', 'Sorry, there was an error processing your request.');
     });
 }
+
+// Speech recognition functionality
+function startSpeechRecognition() {
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'en-US';
+    recognition.start();
+
+    recognition.onresult = function(event) {
+        const speechResult = event.results[0][0].transcript;
+        processUserInput(speechResult);
+    };
+
+    recognition.onerror = function(event) {
+        console.error('Speech recognition error:', event.error);
+    };
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function () {
+    populateVoiceList();
+    synth.onvoiceschanged = populateVoiceList;
+});
+
+document.getElementById('action-button').addEventListener('click', function() {
+    const userInputField = document.getElementById('user-input');
+    const userText = userInputField.value.trim();
+    if (userText) {
+        processUserInput(userText);
+        userInputField.value = '';
+    }
+});
+
+document.getElementById('user-input').addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        document.getElementById('action-button').click();
+    }
+});
+
+document.getElementById('start-speech-recognition').addEventListener('click', function() {
+    startSpeechRecognition();
+});
