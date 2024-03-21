@@ -1,120 +1,111 @@
 let isMuted = false;
 const synth = window.speechSynthesis;
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
   populateVoiceList();
   if (synth.onvoiceschanged !== undefined) {
     synth.onvoiceschanged = populateVoiceList;
   }
+  document.getElementById('action-button').addEventListener('click', processInput);
+  document.getElementById('user-input').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      processInput();
+    }
+  });
+  document.getElementById('start-speech-recognition').addEventListener('click', startSpeechRecognition);
 });
 
 function populateVoiceList() {
-  const voices = synth.getVoices();
   const voiceSelect = document.getElementById('voice-selection');
   voiceSelect.innerHTML = '';
-  voices.forEach(voice => {
+  synth.getVoices().forEach((voice) => {
     const option = document.createElement('option');
-    option.textContent = voice.name + ' (' + voice.lang + ')';
-    if (voice.name === localStorage.getItem('selectedVoice')) {
-      option.selected = true;
-    }
+    option.textContent = `${voice.name} (${voice.lang})`;
+    option.value = voice.name;
     voiceSelect.appendChild(option);
   });
+  voiceSelect.value = localStorage.getItem('selectedVoice') || synth.getVoices()[0].name;
 }
 
-document.getElementById('voice-selection').addEventListener('change', function() {
-  localStorage.setItem('selectedVoice', this.value);
-});
-
-function appendMessage(sender, message) {
-  const chatBox = document.getElementById('jarvis-box');
-  const messageElement = document.createElement('div');
-  messageElement.classList.add('message', sender === 'user' ? 'user-message' : 'jarvis-message');
-  messageElement.textContent = `${sender === 'user' ? 'You' : 'Jarvis'}: ${message}`;
-  chatBox.appendChild(messageElement);
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-function speak(text) {
-  if (isMuted) return;
-  let utterance = new SpeechSynthesisUtterance(text);
-  const selectedVoice = synth.getVoices().find(voice => voice.name === localStorage.getItem('selectedVoice'));
-  if (selectedVoice) utterance.voice = selectedVoice;
-  synth.speak(utterance);
-}
-
-function processUserInput(userInput) {
-  appendMessage('user', userInput);
-  if (userInput.toLowerCase().includes('weather')) {
-    const city = userInput.split(' ').slice(2).join(' ');
-    getWeather(city);
-  } else {
-    sendToOpenAI(userInput);
+function processInput() {
+  const userInput = document.getElementById('user-input').value.trim();
+  if (userInput) {
+    appendMessage('You', userInput);
+    if (userInput.toLowerCase().includes('weather')) {
+      getWeather(userInput.split(' ').slice(1).join(' '));
+    } else {
+      askJarvis(userInput);
+    }
+    document.getElementById('user-input').value = ''; // Clear the input field
   }
 }
 
 function getWeather(city) {
   fetch(`/weather?city=${encodeURIComponent(city)}`)
-    .then(response => response.json())
-    .then(data => {
+    .then((response) => response.json())
+    .then((data) => {
       if (data.error) {
-        appendMessage('jarvis', 'Sorry, I could not fetch the weather.');
+        appendMessage('Jarvis', 'Sorry, I could not fetch the weather.');
       } else {
-        const weatherMessage = `Weather in ${data.city}: ${data.temperature}°C, ${data.description}.`;
-        appendMessage('jarvis', weatherMessage);
-        speak(weatherMessage);
+        const message = `The weather in ${data.city} is ${data.description} with a temperature of ${data.temperature}°C.`;
+        appendMessage('Jarvis', message);
+        speak(message);
       }
     })
-    .catch(error => {
+    .catch((error) => {
       console.error('Error:', error);
-      appendMessage('jarvis', 'Sorry, there was an error processing your request.');
+      appendMessage('Jarvis', 'Sorry, there was an error processing your request.');
     });
 }
 
-function sendToOpenAI(userInput) {
+function askJarvis(query) {
   fetch('/get_response', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ user_input: userInput })
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_input: query })
   })
-  .then(response => response.json())
-  .then(data => {
-    appendMessage('jarvis', data.message);
-    speak(data.message);
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    appendMessage('jarvis', 'Sorry, there was an error processing your request.');
-  });
+    .then((response) => response.json())
+    .then((data) => {
+      appendMessage('Jarvis', data.message);
+      speak(data.message);
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      appendMessage('Jarvis', 'Sorry, there was an error processing your request.');
+    });
+}
+
+function appendMessage(sender, text) {
+  const chatBox = document.getElementById('jarvis-box');
+  const messageDiv = document.createElement('div');
+  messageDiv.classList.add('message', sender.toLowerCase());
+  messageDiv.textContent = `${sender}: ${text}`;
+  chatBox.appendChild(messageDiv);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function speak(text) {
+  if (!isMuted) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    const selectedVoiceName = localStorage.getItem('selectedVoice');
+    utterance.voice = synth.getVoices().find((voice) => voice.name === selectedVoiceName);
+    synth.speak(utterance);
+  }
 }
 
 function startSpeechRecognition() {
   const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
   recognition.lang = 'en-US';
   recognition.start();
+
   recognition.onresult = function(event) {
     const speechResult = event.results[0][0].transcript;
-    processUserInput(speechResult);
+    document.getElementById('user-input').value = speechResult;
+    processInput();
   };
+
   recognition.onerror = function(event) {
     console.error('Speech recognition error:', event.error);
   };
 }
-
-document.getElementById('action-button').addEventListener('click', function() {
-  const userInputField = document.getElementById('user-input');
-  const userText = userInputField.value.trim();
-  if (userText) {
-    processUserInput(userText);
-    userInputField.value = '';
-  }
-});
-
-document.getElementById('user-input').addEventListener('keypress', function(event) {
-  if (event.key === 'Enter') {
-    event.preventDefault();
-    document.getElementById('action-button').click();
-  }
-});
-
-document.getElementById('start-speech-recognition').addEventListener('click', startSpeechRecognition);
