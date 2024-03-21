@@ -68,4 +68,48 @@ function sendToOpenAI(userInput) {
         .catch(error => console.error('Error:', error));
 }
 
-document.getElementById('action-button').addEventListener('click
+// Speech recognition functionality
+function startSpeechRecognition() {
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'en-US';
+    recognition.start();
+
+    recognition.onresult = function(event) {
+        const speechResult = event.results[0][0].transcript;
+        processUserInput(speechResult);
+    };
+
+    recognition.onerror = function(event) {
+        console.error('Speech recognition error:', event.error);
+    };
+}
+
+// Additional functionalities for DALL·E and Object Detection
+document.addEventListener('DOMContentLoaded', function () {
+    populateVoiceList();
+    synth.onvoiceschanged = populateVoiceList;
+    document.getElementById('dalle-button').addEventListener('click', toggleDalleInterface);
+    document.getElementById('generate-image-button').addEventListener('click', generateImageWithDalle);
+    document.getElementById('object-detection-button').addEventListener('click', () => window.location.href = '/object-detection');
+});
+
+function toggleDalleInterface() {
+    const dalleInterface = document.getElementById('dalle-interface');
+    dalleInterface.style.display = dalleInterface.style.display === 'none' ? 'block' : 'none';
+}
+
+function generateImageWithDalle() {
+    const prompt = document.getElementById('dalle-prompt').value;
+    fetch('/generate_image', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ prompt: prompt })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.image_url) {
+            document.getElementById('generated-image').src = data.image_url;
+            document.getElementById('generated-image').style.display = 'block';
+        } else {
+            console.error('Failed to generate image:', data.error);
+       
