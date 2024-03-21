@@ -1,5 +1,7 @@
 let isMuted = false;
 const synth = window.speechSynthesis;
+let recognizing = false;
+const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
 
 function populateVoiceList() {
     const voiceSelect = document.getElementById('voice-selection');
@@ -52,42 +54,87 @@ function startSpeechRecognition() {
 
 document.addEventListener('DOMContentLoaded', function() {
     populateVoiceList();
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = populateVoiceList;
-    }
-    document.getElementById('action-button').addEventListener('click', function() {
-        const userInput = document.getElementById('user-input').value;
-        processUserInput(userInput);
-        document.getElementById('user-input').value = ''; // Clear the input field
-    });
-    document.getElementById('user-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            document.getElementById('action-button').click();
-        }
+    synth.onvoiceschanged = populateVoiceList;
+    document.getElementById('action-button').addEventListener('click', sendUserInput);
+    document.getElementById('start-speech-recognition').addEventListener('click', toggleSpeechRecognition);
+    document.getElementById('voice-selection').addEventListener('change', () => {
+        localStorage.setItem('selectedVoice', document.getElementById('voice-selection').value);
     });
 });
 
-function generateImageWithDalle(prompt) {
-    console.log('Generating image with DALL·E for prompt:', prompt);
-    // Fetch call to your Flask backend to generate an image with DALL·E
-    fetch('/generate_image', {
+function populateVoiceList() {
+    const voiceSelect = document.getElementById('voice-selection');
+    const voices = synth.getVoices();
+    voiceSelect.innerHTML = voices.map(voice => `<option value="${voice.name}" ${voice.name === localStorage.getItem('selectedVoice') ? 'selected' : ''}>${voice.name} (${voice.lang})</option>`).join('');
+}
+
+function sendUserInput() {
+    const userInputField = document.getElementById('user-input');
+    const userInput = userInputField.value.trim();
+    if (!userInput) return;
+    processCommand(userInput);
+    userInputField.value = ''; // Clear input field after sending
+}
+
+function processCommand(command) {
+    appendMessage('user', command);
+    if (command.toLowerCase().startsWith('weather')) {
+        const city = command.split(' ').slice(1).join(' ');
+        fetchWeather(city);
+    } else {
+        fetchOpenAIResponse(command);
+    }
+}
+
+function fetchOpenAIResponse(userInput) {
+    fetch('/get_response', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({prompt: prompt})
+        body: JSON.stringify({ user_input: userInput })
     })
     .then(response => response.json())
-    .then(data => {
-        if (data.image_url) {
-            const imgElement = document.getElementById('generated-image');
-            if (imgElement) {
-                imgElement.src = data.image_url;
-                imgElement.style.display = 'block';
-            }
-        } else {
-            console.error('Failed to generate image:', data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Error generating image:', error);
-    });
+    .then(data => displayResponse(data.message))
+    .catch(error => console.error('Fetch OpenAI response error:', error));
+}
+
+function fetchWeather(city) {
+    fetch(`/weather?city=${encodeURIComponent(city)}`)
+    .then(response => response.json())
+    .then(data => displayResponse(`Weather in ${city}: ${data.temperature}°C, ${data.description}.`))
+    .catch(error => console.error('Fetch weather error:', error));
+}
+
+function displayResponse(message) {
+    appendMessage('jarvis', message);
+    if (!isMuted) speakResponse(message);
+}
+
+function appendMessage(sender, message) {
+    const chatBox = document.getElementById('chat-box');
+    const messageElement = document.createElement('div');
+    messageElement.className = `message ${sender}`;
+    messageElement.textContent = `${sender === 'user' ? 'You' : 'Jarvis'}: ${message}`;
+    chatBox.appendChild(messageElement);
+}
+
+function speakResponse(message) {
+    const utterance = new SpeechSynthesisUtterance(message);
+    utterance.voice = synth.getVoices().find(voice => voice.name === document.getElementById('voice-selection').value);
+    synth.speak(utterance);
+}
+
+function toggleSpeechRecognition() {
+    if (recognizing) {
+        recognition.stop();
+        return;
+    }
+    recognition.lang = 'en-US';
+    recognition.start();
+    recognizing = true;
+    recognition.onresult = (event) => {
+        const speechResult = event.results[0][0].transcript;
+        processCommand(speechResult);
+    };
+    recognition.onend = () => recognizing = false;
+    recognition.onerror = (event) => console.error('Speech recognition error:', event.error);
 }
