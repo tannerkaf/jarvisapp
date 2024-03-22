@@ -7,45 +7,12 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="tab">
-        <button class="tablinks" onclick="openTab(event, 'Chat')">Chat</button>
-        <button class="tablinks" onclick="openTab(event, 'More')">More</button>
-    </div>
-
-    <div id="Chat" class="tabcontent">
-        <h1>Jarvis Chatbot</h1>
-        <div id="jarvis-box" class="chat-box"></div>
-        <input type="text" id="user-input" placeholder="Type a message...">
-        <button id="action-button">Send/Speak</button>
-        <button id="to-object-detection">Go to Object Detection</button>
-    </div>
-
-    <div id="More" class="tabcontent">
-        <h1>More Information</h1>
-        <p>Additional content can go here.</p>
-    </div>
-
+    <h1>Jarvis Chatbot</h1>
+    <div id="jarvis-box" class="chat-box"></div>
+    <input type="text" id="user-input" placeholder="Type a message...">
+    <button id="action-button">Send/Speak</button>
+    <button id="to-object-detection">Go to Object Detection</button>
     <!-- Include script.js here -->
     <script src="script.js"></script>
-    <script>
-        function openTab(evt, tabName) {
-            var i, tabcontent, tablinks;
-            tabcontent = document.getElementsByClassName("tabcontent");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-            }
-            tablinks = document.getElementsByClassName("tablinks");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].className = tablinks[i].className.replace(" active", "");
-            }
-            document.getElementById(tabName).style.display = "block";
-            evt.currentTarget.className += " active";
-        }
-
-        // Default open tab
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelector('.tablinks').click();
-        });
-    </script>
 </body>
 </html>
