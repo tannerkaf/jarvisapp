@@ -1,19 +1,53 @@
 let isMuted = false;
 const synth = window.speechSynthesis;
+let selectedVoice;
 
-// Function to populate voice selection dropdown
-function populateVoiceList() {
-    const voices = synth.getVoices();
-    const voiceSelect = document.getElementById('voice-selection');
-    voiceSelect.innerHTML = '';
-    voices.forEach(voice => {
-        const option = document.createElement('option');
-        option.textContent = voice.name;
-        voiceSelect.appendChild(option);
+document.addEventListener('DOMContentLoaded', function() {
+    // Attempt to select the desired voice once voices are loaded
+    selectVoice("Microsoft Ryan Online (Natural) - English (United Kingdom)");
+
+    synth.onvoiceschanged = () => {
+        selectVoice("Microsoft Ryan Online (Natural) - English (United Kingdom)");
+    };
+
+    document.getElementById('action-button').addEventListener('click', function() {
+        const userInputField = document.getElementById('user-input');
+        const userText = userInputField.value.trim();
+        if (userText) {
+            processUserInput(userText);
+            userInputField.value = ''; // Clear input field
+        }
     });
+
+    document.getElementById('user-input').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Stop the form from submitting
+            document.getElementById('action-button').click();
+        }
+    });
+
+    document.getElementById('start-speech-recognition').addEventListener('click', startSpeechRecognition);
+});
+
+function selectVoice(voiceName) {
+    const voices = synth.getVoices();
+    selectedVoice = voices.find(voice => voice.name === voiceName);
+
+    if (!selectedVoice) {
+        console.log(`Voice "${voiceName}" not found. Using default voice.`);
+    } else {
+        console.log(`Using voice: ${selectedVoice.name}`);
+    }
 }
 
-// Function to append messages to the chat
+function speak(text) {
+    if (isMuted || !selectedVoice) return;
+
+    let utterance = new SpeechSynthesisUtterance(text);
+    utterance.voice = selectedVoice;
+    synth.speak(utterance);
+}
+
 function appendMessage(sender, message) {
     const chatBox = document.getElementById('jarvis-box');
     const messageElement = document.createElement('div');
@@ -21,51 +55,14 @@ function appendMessage(sender, message) {
     messageElement.textContent = `${sender === 'user' ? 'You' : 'Jarvis'}: ${message}`;
     chatBox.appendChild(messageElement);
     chatBox.scrollTop = chatBox.scrollHeight;
+    if (sender === 'jarvis' && !isMuted) speak(message);
 }
 
-// Function to handle text-to-speech
-function speak(text) {
-    if (isMuted) return;
-    let utterance = new SpeechSynthesisUtterance(text);
-    const selectedVoice = synth.getVoices().find(voice => voice.name === document.getElementById('voice-selection').value);
-    if (selectedVoice) {
-        utterance.voice = selectedVoice;
-    }
-    synth.speak(utterance);
-}
-
-// Function to process user input
 function processUserInput(userInput) {
     appendMessage('user', userInput);
-
-    if (userInput.toLowerCase().includes('weather')) {
-        const city = userInput.split(' ').slice(1).join(' ');
-        getWeather(city);
-    } else {
-        sendToOpenAI(userInput);
-    }
+    sendToOpenAI(userInput);
 }
 
-// Fetch weather data from Flask backend
-function getWeather(city) {
-    fetch(`http://localhost:5000/weather?city=${encodeURIComponent(city)}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                appendMessage('jarvis', 'Sorry, I could not fetch the weather.');
-            } else {
-                const weatherMessage = `Weather in ${data.city}: ${data.temperature}°C, ${data.description}.`;
-                appendMessage('jarvis', weatherMessage);
-                speak(weatherMessage);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            appendMessage('jarvis', 'Sorry, there was an error processing your request.');
-        });
-}
-
-// Send input to OpenAI API through Flask backend
 function sendToOpenAI(userInput) {
     fetch('http://localhost:5000/get_response', {
         method: 'POST',
@@ -77,7 +74,6 @@ function sendToOpenAI(userInput) {
     .then(response => response.json())
     .then(data => {
         appendMessage('jarvis', data.message);
-        speak(data.message);
     })
     .catch(error => {
         console.error('Error:', error);
@@ -85,9 +81,11 @@ function sendToOpenAI(userInput) {
     });
 }
 
-// Speech recognition functionality
 function startSpeechRecognition() {
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    if (recognizing) {
+        recognition.stop();
+        return;
+    }
     recognition.lang = 'en-US';
     recognition.start();
 
@@ -100,29 +98,3 @@ function startSpeechRecognition() {
         console.error('Speech recognition error:', event.error);
     };
 }
-
-// Event listeners
-document.addEventListener('DOMContentLoaded', function () {
-    populateVoiceList();
-    synth.onvoiceschanged = populateVoiceList;
-});
-
-document.getElementById('action-button').addEventListener('click', function() {
-    const userInputField = document.getElementById('user-input');
-    const userText = userInputField.value.trim();
-    if (userText) {
-        processUserInput(userText);
-        userInputField.value = '';
-    }
-});
-
-document.getElementById('user-input').addEventListener('keypress', function(event) {
-    if (event.key === 'Enter') {
-        event.preventDefault();
-        document.getElementById('action-button').click();
-    }
-});
-
-document.getElementById('start-speech-recognition').addEventListener('click', function() {
-    startSpeechRecognition();
-});
