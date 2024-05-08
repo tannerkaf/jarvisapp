@@ -14,7 +14,7 @@ function openTab(evt, tabName) {
     }
 
     // Show the current tab and add "active" class to the button that opened the tab
-    document.getElementById(tabName).style.display = "block";
+    document.getElementById(tabName). style.display = "block";
     evt.currentTarget.className += " active";
 
     // Ensure graph animation only starts when the Graphs tab is selected
@@ -28,31 +28,22 @@ function startGraphAnimation() {
     const canvas = document.getElementById('graphCanvas');
     if (canvas) {
         const ctx = canvas.getContext('2d');
-        let xPos = 0;
-        let yPos = canvas.height / 2;
-
+        let time = 0;
+        
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'rgba(0, 51, 0, 0.4)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.beginPath();
-            ctx.moveTo(xPos, yPos);
+            ctx.moveTo(0, canvas.height / 2);
             
-            // Increment or decrement y position slightly for variation
-            yPos += Math.random() * 20 - 10;
-            xPos += 20; // Slower x increment
+            for (let i = 0; i < canvas.width; i++) {
+                ctx.lineTo(i, canvas.height / 2 + 50 * Math.sin((i + time) * 0.05));
+            }
 
-            ctx.lineTo(xPos, yPos);
             ctx.strokeStyle = '#32CD32';
             ctx.lineWidth = 2;
             ctx.stroke();
-
-            // Reset at the end of canvas
-            if (xPos > canvas.width) {
-                xPos = 0;
-                yPos = canvas.height / 2;
-            }
-
+            time += 1;
+            
             requestAnimationFrame(draw);
         }
 
@@ -60,15 +51,27 @@ function startGraphAnimation() {
     }
 }
 
+// Function to append message to chatbox
+function appendMessage(sender, message) {
+    const chatBox = document.getElementById('jarvis-box');
+    const messageElement = document.createElement('div');
+    messageElement.textContent = `${sender === 'user' ? 'You' : 'Jarvis'}: ${message}`;
+    chatBox.appendChild(messageElement);
+    chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the latest message
+}
+
 // Process user input
 function processUserInput(userInput) {
+    appendMessage('user', userInput);
     console.log("User input:", userInput); // Log to console for now
-    // Here you should add your code to handle the user input, such as sending it to a server or processing it directly.
+    // Here you can add your code to handle the user input, such as sending it to a server
+    // For demo purposes, let's simulate a Jarvis response
+    appendMessage('Jarvis', 'Received: ' + userInput);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     // Set default open tab and attach event listeners to tab buttons
-    document.querySelector('.tablinks').click(); 
+    document.querySelector('.tablinks').click();
 
     const sendButton = document.getElementById('action-button');
     sendButton.addEventListener('click', function() {
