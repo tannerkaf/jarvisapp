@@ -14,12 +14,28 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Function to process user input
-function processUserInput(userInput) {
-    console.log("Processing user input: ", userInput); // Output user input to console for debugging
-    appendMessage('user', userInput); // Display user input in the chatbox
+function openTab(evt, tabName) {
+    // Get all elements with class="tabcontent" and hide them
+    let tabcontent = document.getElementsByClassName("tabcontent");
+    for (let i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
 
-    // Simulate sending data to a server and getting a response
+    // Get all elements with class="tablinks" and remove the class "active"
+    let tablinks = document.getElementsByClassName("tablinks");
+    for (let i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+}
+
+function processUserInput(userInput) {
+    console.log("Processing user input: ", userInput);
+    appendMessage('user', userInput);
+
     fetch('/get_response', {
         method: 'POST',
         headers: {
@@ -30,22 +46,21 @@ function processUserInput(userInput) {
     .then(response => response.json())
     .then(data => {
         if (data.message) {
-            appendMessage('Jarvis', data.message);  // Display the response from the server
+            appendMessage('Jarvis', data.message);
         } else if (data.error) {
-            appendMessage('Jarvis', 'Error: ' + data.error);  // Display any errors that were received
+            appendMessage('Jarvis', 'Error: ' + data.error);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        appendMessage('Jarvis', 'Sorry, there was an error processing your request.');  // Inform the user there was an error
+        appendMessage('Jarvis', 'Sorry, there was an error processing your request.');
     });
 }
 
-// Function to append messages to the chatbox
 function appendMessage(sender, message) {
     const chatBox = document.getElementById('jarvis-box');
     const messageElement = document.createElement('div');
     messageElement.textContent = `${sender === 'user' ? 'You' : sender}: ${message}`;
     chatBox.appendChild(messageElement);
-    chatBox.scrollTop = chatBox.scrollHeight;  // Automatically scroll to the newest message
+    chatBox.scrollTop = chatBox.scrollHeight;
 }

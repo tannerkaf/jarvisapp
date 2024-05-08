@@ -9,7 +9,6 @@
 <body>
     <div class="tab">
         <button class="tablinks" onclick="openTab(event, 'Chat')">Chat</button>
-        <button class="tablinks" onclick="openTab(event, 'Graphs')">Graphs</button>
         <button class="tablinks" onclick="openTab(event, 'More')">More</button>
     </div>
 
@@ -18,14 +17,6 @@
         <div id="jarvis-box" class="chat-box"></div>
         <input type="text" id="user-input" placeholder="Type a message...">
         <button id="action-button">Send/Speak</button>
-        <button id="to-object-detection">Go to Object Detection</button>
-    </div>
-
-    <div id="Graphs" class="tabcontent">
-        <h1>Dynamic Graphs</h1>
-        <div class="graph-container">
-            <canvas id="graphCanvas"></canvas>
-        </div>
     </div>
 
     <div id="More" class="tabcontent">
@@ -33,7 +24,6 @@
         <p>Additional content can go here.</p>
     </div>
 
-    <!-- Include script.js here -->
     <script src="script.js"></script>
 </body>
 </html>
