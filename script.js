@@ -14,7 +14,7 @@ function openTab(evt, tabName) {
     }
 
     // Show the current tab and add "active" class to the button that opened the tab
-    document.getElementById(tabName). style.display = "block";
+    document.getElementById(tabName).style.display = "block";
     evt.currentTarget.className += " active";
 
     // Ensure graph animation only starts when the Graphs tab is selected
@@ -29,12 +29,12 @@ function startGraphAnimation() {
     if (canvas) {
         const ctx = canvas.getContext('2d');
         let time = 0;
-        
+
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.beginPath();
             ctx.moveTo(0, canvas.height / 2);
-            
+
             for (let i = 0; i < canvas.width; i++) {
                 ctx.lineTo(i, canvas.height / 2 + 50 * Math.sin((i + time) * 0.05));
             }
@@ -43,7 +43,7 @@ function startGraphAnimation() {
             ctx.lineWidth = 2;
             ctx.stroke();
             time += 1;
-            
+
             requestAnimationFrame(draw);
         }
 
@@ -60,18 +60,30 @@ function appendMessage(sender, message) {
     chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the latest message
 }
 
-// Process user input
+// Process user input and send it to the Flask backend
 function processUserInput(userInput) {
     appendMessage('user', userInput);
-    console.log("User input:", userInput); // Log to console for now
-    // Here you can add your code to handle the user input, such as sending it to a server
-    // For demo purposes, let's simulate a Jarvis response
-    appendMessage('Jarvis', 'Received: ' + userInput);
+
+    // Sending data to Flask backend
+    fetch('/get_response', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ user_input: userInput })
+    })
+    .then(response => response.json())
+    .then(data => {
+        appendMessage('Jarvis', data.message);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        appendMessage('Jarvis', 'Sorry, there was an error processing your request.');
+    });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Set default open tab and attach event listeners to tab buttons
-    document.querySelector('.tablinks').click();
+    document.querySelector('.tablinks').click(); // Open the first tab by default
 
     const sendButton = document.getElementById('action-button');
     sendButton.addEventListener('click', function() {
