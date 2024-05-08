@@ -1,18 +1,23 @@
 /* General body styles */
-body {
+body, html {
     font-family: 'Arial', sans-serif;
     background-color: #282a36; /* Dark background for contrast */
     color: #32CD32; /* Lime green text for that classic Jarvis look */
     margin: 0;
     padding: 0;
-    height: 100%;
+    height: 100%; /* Full height */
+    width: 100%; /* Full width */
+    overflow: hidden; /* Prevents scrolling */
 }
 
-/* Style the tab */
+/* Style the tab area */
 .tab {
     overflow: hidden;
     border: 1px solid #005000; /* Dark green border */
     background-color: #003300; /* Deep green background */
+    position: fixed; /* Fixed at the top */
+    width: 100%;
+    z-index: 1000;
 }
 
 /* Style the buttons inside the tab */
@@ -36,37 +41,52 @@ body {
 /* Style the tab content */
 .tabcontent {
     display: none;
+    position: absolute;
+    top: 48px; /* Height of the tab */
+    bottom: 0;
+    left: 0;
+    right: 0;
     padding: 10px 20px;
-    border: 1px solid #005000; /* Dark green border */
+    overflow-y: auto; /* Allows scrolling within the tab content */
     border-top: none;
     background: rgba(0, 51, 0, 0.9); /* Translucent deep green background */
-    height: calc(100% - 50px); /* Full height minus tab height */
-    display: flex;
-    flex-direction: column;
 }
 
-/* Chat box and graph container styles */
-.chat-box, .graph-container {
-    flex: 1;
-    overflow-y: auto;
-}
-
-.graph-container {
-    position: relative;
-    width: 100%;
-    background: #000; /* Dark background for the graph area */
-}
-
-canvas {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
+/* Chat box styles */
+.chat-box {
+    height: 90%; /* Adjust based on content */
+    margin-bottom: 10px;
+    border: 1px solid #005000; /* Dark green border */
+    padding: 10px;
+    background: rgba(0, 51, 0, 0.85); /* Translucent deep green background */
+    color: #32CD32; /* Lime green text */
+    overflow-y: auto; /* Scrollable content */
 }
 
 /* Input and button styling */
 input[type="text"], button {
     padding: 10px;
     margin-top: 10px;
-    border: 
+    border: 1px solid #006400; /* Darker green border for inputs and buttons */
+    background: #003300; /* Deep green background for inputs and buttons */
+    color: #32CD32; /* Lime green text */
+    width: calc(100% - 22px); /* Full width with padding correction */
+    box-sizing: border-box; /* Includes padding and border in width */
+}
+
+button {
+    width: auto;
+    cursor: pointer;
+}
+
+/* Minor animation for buttons */
+button:hover {
+    background-color: #004d00; /* Brighter green on hover */
+    color: #ffffff; /* White text for contrast on hover */
+}
+
+/* Ensure canvas fills its container */
+canvas {
+    width: 100%;
+    height: 100%;
+}
