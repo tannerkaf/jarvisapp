@@ -5,6 +5,7 @@ body {
     color: #32CD32; /* Lime green text for that classic Jarvis look */
     margin: 0;
     padding: 0;
+    height: 100%;
 }
 
 /* Style the tab */
@@ -39,41 +40,33 @@ body {
     border: 1px solid #005000; /* Dark green border */
     border-top: none;
     background: rgba(0, 51, 0, 0.9); /* Translucent deep green background */
+    height: calc(100% - 50px); /* Full height minus tab height */
+    display: flex;
+    flex-direction: column;
 }
 
-/* Chat box styles */
-.chat-box {
-    height: 300px;
-    overflow-y: scroll;
-    margin-bottom: 10px;
-    border: 1px solid #005000; /* Dark green border */
-    padding: 10px;
-    background: rgba(0, 51, 0, 0.85); /* Translucent deep green background */
-    color: #32CD32; /* Lime green text */
+/* Chat box and graph container styles */
+.chat-box, .graph-container {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.graph-container {
+    position: relative;
+    width: 100%;
+    background: #000; /* Dark background for the graph area */
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 /* Input and button styling */
 input[type="text"], button {
     padding: 10px;
     margin-top: 10px;
-    border: 1px solid #006400; /* Darker green border for inputs and buttons */
-    background: #003300; /* Deep green background for inputs and buttons */
-    color: #32CD32; /* Lime green text */
-    width: calc(100% - 22px); /* Full width with padding correction */
-}
-
-button {
-    width: auto;
-    cursor: pointer;
-}
-
-/* Minor animation for buttons */
-button:hover {
-    background-color: #004d00; /* Brighter green on hover */
-    color: #ffffff; /* White text for contrast on hover */
-}
-
-/* Responsive video and canvas overlay */
-video, canvas {
-    max-width: 100%;
-}
+    border: 
