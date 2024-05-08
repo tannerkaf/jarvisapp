@@ -1,41 +1,8 @@
-// Function to append message to chatbox
-function appendMessage(sender, message) {
-    const chatBox = document.getElementById('jarvis-box');
-    const messageElement = document.createElement('div');
-    messageElement.textContent = `${sender === 'user' ? 'You' : 'Jarvis'}: ${message}`;
-    chatBox.appendChild(messageElement);
-    chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the latest message
-}
-
-// Process user input and send it to the Flask backend
-function processUserInput(userInput) {
-    appendMessage('user', userInput);
-
-    // Sending data to Flask backend
-    fetch('/get_response', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ user_input: userInput })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message) {
-            appendMessage('Jarvis', data.message);
-        } else if (data.error) {
-            appendMessage('Jarvis', data.error);  // Handle any errors that the Flask app sends back
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        appendMessage('Jarvis', 'Sorry, there was an error processing your request.');
-    });
-}
-
 document.addEventListener('DOMContentLoaded', function() {
-    document.querySelector('.tablinks').click(); // Open the first tab by default
+    // Initialize the page by opening the first tab
+    document.querySelector('.tablinks').click();
 
+    // Set up the send button to process user input when clicked
     const sendButton = document.getElementById('action-button');
     sendButton.addEventListener('click', function() {
         const userInputField = document.getElementById('user-input');
@@ -46,3 +13,39 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Function to process user input
+function processUserInput(userInput) {
+    console.log("Processing user input: ", userInput); // Output user input to console for debugging
+    appendMessage('user', userInput); // Display user input in the chatbox
+
+    // Simulate sending data to a server and getting a response
+    fetch('/get_response', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ user_input: userInput })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            appendMessage('Jarvis', data.message);  // Display the response from the server
+        } else if (data.error) {
+            appendMessage('Jarvis', 'Error: ' + data.error);  // Display any errors that were received
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        appendMessage('Jarvis', 'Sorry, there was an error processing your request.');  // Inform the user there was an error
+    });
+}
+
+// Function to append messages to the chatbox
+function appendMessage(sender, message) {
+    const chatBox = document.getElementById('jarvis-box');
+    const messageElement = document.createElement('div');
+    messageElement.textContent = `${sender === 'user' ? 'You' : sender}: ${message}`;
+    chatBox.appendChild(messageElement);
+    chatBox.scrollTop = chatBox.scrollHeight;  // Automatically scroll to the newest message
+}
