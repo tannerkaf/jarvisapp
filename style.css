@@ -41,20 +41,19 @@ body, html {
 /* Style the tab content */
 .tabcontent {
     display: none;
-    position: absolute;
+    position: fixed;
     top: 48px; /* Height of the tab */
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 10px 20px;
+    padding: 10px;
     overflow-y: auto; /* Allows scrolling within the tab content */
-    border-top: none;
     background: rgba(0, 51, 0, 0.9); /* Translucent deep green background */
 }
 
 /* Chat box styles */
 .chat-box {
-    height: 90%; /* Adjust based on content */
+    height: calc(80% - 20px); /* Reduced height, more space for input */
     margin-bottom: 10px;
     border: 1px solid #005000; /* Dark green border */
     padding: 10px;
@@ -66,7 +65,8 @@ body, html {
 /* Input and button styling */
 input[type="text"], button {
     padding: 10px;
-    margin-top: 10px;
+    margin-top: 5px; /* Less margin above input field */
+    margin-bottom: 5px; /* Space below input field */
     border: 1px solid #006400; /* Darker green border for inputs and buttons */
     background: #003300; /* Deep green background for inputs and buttons */
     color: #32CD32; /* Lime green text */
