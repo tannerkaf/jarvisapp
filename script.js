@@ -1,16 +1,11 @@
 let isMuted = false;
 const synth = window.speechSynthesis;
 
-// Function to populate voice selection dropdown
-function populateVoiceList() {
+// Function to set a specific voice
+function setVoice() {
     const voices = synth.getVoices();
-    const voiceSelect = document.getElementById('voice-selection');
-    voiceSelect.innerHTML = '';
-    voices.forEach(voice => {
-        const option = document.createElement('option');
-        option.textContent = voice.name;
-        voiceSelect.appendChild(option);
-    });
+    const selectedVoice = voices.find(voice => voice.name === "Microsoft Ryan Online (Natural) - English (United Kingdom)");
+    return selectedVoice;
 }
 
 // Function to append messages to the chat
@@ -27,10 +22,7 @@ function appendMessage(sender, message) {
 function speak(text) {
     if (isMuted) return;
     let utterance = new SpeechSynthesisUtterance(text);
-    const selectedVoice = synth.getVoices().find(voice => voice.name === document.getElementById('voice-selection').value);
-    if (selectedVoice) {
-        utterance.voice = selectedVoice;
-    }
+    utterance.voice = setVoice();
     synth.speak(utterance);
 }
 
@@ -85,26 +77,11 @@ function sendToOpenAI(userInput) {
     });
 }
 
-// Speech recognition functionality
-function startSpeechRecognition() {
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = 'en-US';
-    recognition.start();
-
-    recognition.onresult = function(event) {
-        const speechResult = event.results[0][0].transcript;
-        processUserInput(speechResult);
-    };
-
-    recognition.onerror = function(event) {
-        console.error('Speech recognition error:', event.error);
-    };
-}
-
 // Event listeners
 document.addEventListener('DOMContentLoaded', function () {
-    populateVoiceList();
-    synth.onvoiceschanged = populateVoiceList;
+    if (synth.onvoiceschanged !== undefined) {
+        synth.onvoiceschanged = setVoice;
+    }
 });
 
 document.getElementById('action-button').addEventListener('click', function() {
@@ -112,7 +89,7 @@ document.getElementById('action-button').addEventListener('click', function() {
     const userText = userInputField.value.trim();
     if (userText) {
         processUserInput(userText);
-        userInputField.value = '';
+        userInputField.value = ''; // Clear input field after sending
     }
 });
 
