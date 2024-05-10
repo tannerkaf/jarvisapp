@@ -8,11 +8,15 @@
 </head>
 <body>
     <h1>Jarvis Chatbot</h1>
+    <select id="voice-selection"></select> <!-- Voice selection dropdown -->
     <div id="jarvis-box" class="chat-box"></div>
+    <div id="loading-indicator" style="display: none;">
+        <div class="loader"></div>
+    </div>
     <input type="text" id="user-input" placeholder="Type a message...">
     <button id="action-button">Send/Speak</button>
-    <button id="to-object-detection">Go to Object Detection</button>
-    <!-- Include script.js here -->
+    <button id="start-speech-recognition">Start Speech Recognition</button>
+    <button id="stop-speech">Stop Response</button>
     <script src="script.js"></script>
 </body>
 </html>
