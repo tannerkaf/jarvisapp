@@ -9,19 +9,22 @@
 <body>
     <div class="tab">
         <button class="tablinks" onclick="openTab(event, 'Chat')">Chat</button>
+        <button class="tablinks" onclick="openTab(event, 'ObjectDetection')">Object Detection</button>
         <button class="tablinks" onclick="openTab(event, 'More')">More</button>
     </div>
 
     <div id="Chat" class="tabcontent">
         <h1>Jarvis Chatbot</h1>
         <div id="jarvis-box" class="chat-box"></div>
-        <div id="loading-indicator" style="display: none;">
-            <div class="loader"></div>
-        </div>
         <input type="text" id="user-input" placeholder="Type a message...">
-        <button id="action-button">Send/Speak</button>
+        <button id="action-button">Send</button>
         <button id="start-speech-recognition">Start Speech Recognition</button>
-        <button id="stop-speech">Stop Response</button>
+    </div>
+
+    <div id="ObjectDetection" class="tabcontent">
+        <h1>Object Detection</h1>
+        <p>Object detection module will be displayed here.</p>
+        <!-- Object detection content or iframe can be added here -->
     </div>
 
     <div id="More" class="tabcontent">
