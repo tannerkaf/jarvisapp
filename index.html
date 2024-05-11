@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jarvis Chatbot</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 </head>
 <body>
     <div class="tab">
@@ -23,8 +25,8 @@
 
     <div id="ObjectDetection" class="tabcontent">
         <h1>Object Detection</h1>
-        <p>Object detection module will be displayed here.</p>
-        <!-- Object detection content or iframe can be added here -->
+        <video id="webcam" autoplay playsinline width="640" height="480"></video>
+        <canvas id="canvas" width="640" height="480"></canvas>
     </div>
 
     <div id="More" class="tabcontent">
