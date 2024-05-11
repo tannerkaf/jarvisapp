@@ -2,23 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Simple Webcam Test</title>
+    <title>Object Detection</title>
+    <style>
+        body { display: flex; flex-direction: column; align-items: center; }
+        #webcam { margin-top: 20px; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 </head>
 <body>
-    <h1>Webcam Test</h1>
-    <video id="webcam" autoplay playsinline></video>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const video = document.getElementById('webcam');
-            navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                video.srcObject = stream;
-                video.play();
-            }).catch(error => {
-                alert('Error accessing the camera: ' + error.toString());
-            });
-        });
-    </script>
+    <h1>Object Detection</h1>
+    <video id="webcam" autoplay playsinline width="640" height="480"></video>
+    <canvas id="canvas" width="640" height="480" style="position: absolute; top: 0; left: calc(50% - 320px);"></canvas>
+    <script src="object-detection.js" defer></script>
 </body>
 </html>
