@@ -7,16 +7,14 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
-    <script src="object-detection.js" defer></script>
 </head>
 <body>
     <h1>Object Detection</h1>
     <div id="webcam-container">
-        <video id="webcam" autoplay playsinline></video>
-        <canvas id="canvas" style="position: absolute;"></canvas>
+        <video id="webcam" autoplay playsinline width="640" height="480"></video>
+        <canvas id="canvas"></canvas>
     </div>
-    <button id="flip-camera">Flip Camera</button>
-    <button id="toggle-camera">Toggle Front/Back Camera</button>
-    <button onclick="window.location.href='index.html'">Return to Chatbot</button>
+    <button id="toggle-camera">Toggle Camera</button>
+    <script src="object-detection.js" defer></script>
 </body>
 </html>
