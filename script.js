@@ -33,7 +33,8 @@ document.getElementById('action-button').addEventListener('click', function() {
         fetch('/get_response', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
             body: JSON.stringify({ user_input: userText })
         })
@@ -44,7 +45,11 @@ document.getElementById('action-button').addEventListener('click', function() {
             return response.json();
         })
         .then(data => {
-            appendMessage('jarvis', data.message);
+            if (data.message) {
+                appendMessage('jarvis', data.message);
+            } else if (data.error) {
+                appendMessage('jarvis', data.error);
+            }
         })
         .catch(error => {
             console.error('Error:', error);
