@@ -2,15 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Object Detection</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    <title>Simple Webcam Test</title>
 </head>
 <body>
-    <h1>Object Detection</h1>
-    <video id="webcam" autoplay playsinline width="640" height="480"></video>
-    <canvas id="canvas"></canvas>
-    <script src="object-detection.js"></script>
+    <h1>Webcam Test</h1>
+    <video id="webcam" autoplay playsinline></video>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const video = document.getElementById('webcam');
+            navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+                video.play();
+            }).catch(error => {
+                alert('Error accessing the camera: ' + error.toString());
+            });
+        });
+    </script>
 </body>
 </html>
