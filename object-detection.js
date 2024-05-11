@@ -16,7 +16,11 @@ document.addEventListener('DOMContentLoaded', () => {
         startWebcam();
     });
 
-    startWebcam();
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        startWebcam();
+    } else {
+        console.error("getUserMedia is not supported by your browser!");
+    }
 
     function startWebcam() {
         navigator.mediaDevices.getUserMedia({
@@ -48,6 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 requestAnimationFrame(detectFrame);
             });
+        }).catch(error => {
+            console.error("Failed to load the model:", error);
         });
     }
 });
