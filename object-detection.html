@@ -3,18 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Object Detection - Jarvis</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Object Detection</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 </head>
 <body>
     <h1>Object Detection</h1>
-    <div id="webcam-container">
-        <video id="webcam" autoplay playsinline width="640" height="480"></video>
-        <canvas id="canvas"></canvas>
-    </div>
-    <button id="toggle-camera">Toggle Camera</button>
-    <script src="object-detection.js" defer></script>
+    <video id="webcam" autoplay playsinline width="640" height="480"></video>
+    <canvas id="canvas"></canvas>
+    <script src="object-detection.js"></script>
 </body>
 </html>
