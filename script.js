@@ -25,7 +25,9 @@ function appendMessage(sender, message) {
     messageElement.textContent = `${sender === 'user' ? 'You' : 'Jarvis'}: ${message}`;
     chatBox.appendChild(messageElement);
     chatBox.scrollTop = chatBox.scrollHeight;
-    speak(message);
+    if (sender === 'jarvis') {
+        speak(message);
+    }
 }
 
 function speak(text) {
