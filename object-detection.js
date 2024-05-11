@@ -1,6 +1,7 @@
 let useFrontCamera = true;
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("Document loaded, initializing webcam...");
     const video = document.getElementById('webcam');
     const canvas = document.getElementById('canvas');
     const context = canvas.getContext('2d');
@@ -9,18 +10,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     flipCameraButton.addEventListener('click', () => {
         video.classList.toggle('flipped');
+        console.log("Camera flipped.");
     });
 
     toggleCameraButton.addEventListener('click', () => {
         useFrontCamera = !useFrontCamera;
+        console.log("Toggling camera to " + (useFrontCamera ? "front" : "back"));
         startWebcam();
     });
 
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        startWebcam();
-    } else {
-        console.error("getUserMedia is not supported by your browser!");
-    }
+    startWebcam();
 
     function startWebcam() {
         navigator.mediaDevices.getUserMedia({
@@ -28,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(stream => {
             video.srcObject = stream;
             video.onloadedmetadata = () => {
+                console.log("Webcam feed loaded.");
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
                 video.play();
@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function detectFrame() {
         cocoSsd.load().then(model => {
+            console.log("Model loaded.");
             model.detect(video).then(predictions => {
                 context.clearRect(0, 0, canvas.width, canvas.height);
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
