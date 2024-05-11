@@ -27,6 +27,7 @@ function appendMessage(sender, message) {
 document.getElementById('action-button').addEventListener('click', function() {
     const userInputField = document.getElementById('user-input');
     const userText = userInputField.value.trim();
+    userInputField.value = ''; // Clear the input field right after the button is pressed
     if (userText) {
         appendMessage('user', userText);
         fetch('/get_response', {
@@ -36,14 +37,25 @@ document.getElementById('action-button').addEventListener('click', function() {
             },
             body: JSON.stringify({ user_input: userText })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             appendMessage('jarvis', data.message);
-            userInputField.value = ''; // Clear the input field after sending
         })
         .catch(error => {
             console.error('Error:', error);
             appendMessage('jarvis', 'Sorry, there was an error processing your request.');
         });
+    }
+});
+
+document.getElementById('user-input').addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        document.getElementById('action-button').click();
     }
 });
