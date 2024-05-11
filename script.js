@@ -1,5 +1,8 @@
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelector('.tablinks').click(); // Automatically click the first tab
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = populateVoiceList;
+    }
 });
 
 function openTab(evt, tabName) {
@@ -22,14 +25,21 @@ function appendMessage(sender, message) {
     messageElement.textContent = `${sender === 'user' ? 'You' : 'Jarvis'}: ${message}`;
     chatBox.appendChild(messageElement);
     chatBox.scrollTop = chatBox.scrollHeight;
+    speak(message);
+}
+
+function speak(text) {
+    var synth = window.speechSynthesis;
+    var utterance = new SpeechSynthesisUtterance(text);
+    synth.speak(utterance);
 }
 
 document.getElementById('action-button').addEventListener('click', function() {
     const userInputField = document.getElementById('user-input');
     const userText = userInputField.value.trim();
-    userInputField.value = ''; // Clear the input field right after the button is pressed
     if (userText) {
         processUserInput(userText);
+        userInputField.value = ''; // Clear the input field right after the button is pressed
     }
 });
 
@@ -74,3 +84,21 @@ function sendToOpenAI(userInput) {
         console.error('Error:', error);
     });
 }
+
+function startSpeechRecognition() {
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'en-US';
+    recognition.start();
+
+    recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('user-input').value = transcript; // Display recognized speech in input field
+        processUserInput(transcript);
+    };
+
+    recognition.onerror = function(event) {
+        console.error('Speech recognition error:', event.error);
+    };
+}
+
+document.getElementById('start-speech-recognition').addEventListener('click', startSpeechRecognition);
