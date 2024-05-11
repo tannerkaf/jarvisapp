@@ -6,13 +6,14 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function openTab(evt, tabName) {
-    var i, tabcontent, tablinks;
+    var tabcontent, tablinks;
     tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
+    tablinks = document.getElementsByClassName("tablinks");
+    
+    for (let i = 0; i < tabcontent.length; i++) {
         tabcontent[i].style.display = "none";
     }
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
+    for (let i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
     document.getElementById(tabName).style.display = "block";
@@ -21,8 +22,7 @@ function openTab(evt, tabName) {
 
 function populateVoiceList() {
     const voices = synth.getVoices();
-    const selectedVoice = voices.find(voice => voice.name === "Microsoft Ryan Online (Natural) - English (United Kingdom)");
-    return selectedVoice;
+    return voices.find(voice => voice.name === "Microsoft Ryan Online (Natural) - English (United Kingdom)");
 }
 
 function appendMessage(sender, message) {
@@ -43,9 +43,9 @@ function speak(text) {
 document.getElementById('action-button').addEventListener('click', function() {
     const userInputField = document.getElementById('user-input');
     const userText = userInputField.value.trim();
-    userInputField.value = ''; // Clear the input field right after the button is pressed
     if (userText) {
         processUserInput(userText);
+        userInputField.value = ''; // Clear the input field right after the button is pressed
     }
 });
 
@@ -61,11 +61,17 @@ function processUserInput(userInput) {
     speak(userInput);  // Speak out the user input for confirmation
 
     if (userInput.toLowerCase().includes('weather')) {
-        const city = userInput.split(' ').slice(1).join(' ');
-        getWeather(city);
+        getWeather(userInput);
     } else {
         sendToOpenAI(userInput);
     }
+}
+
+function getWeather(userInput) {
+    const city = userInput.split(' ').slice(1).join(' ');
+    fetch(`http://localhost:5000/weather?city=${encodeURIComponent(city)}`)
+        .then(handleResponse)
+        .catch(handleError);
 }
 
 function sendToOpenAI(userInput) {
@@ -76,21 +82,27 @@ function sendToOpenAI(userInput) {
         },
         body: JSON.stringify({ user_input: userInput })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
+    .then(handleResponse)
+    .catch(handleError);
+}
+
+function handleResponse(response) {
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    return response.json().then(data => {
         if (data.message) {
             appendMessage('jarvis', data.message);
             speak(data.message);
+        } else if (data.error) {
+            appendMessage('jarvis', data.error);
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
     });
+}
+
+function handleError(error) {
+    console.error('Error:', error);
+    appendMessage('jarvis', 'Sorry, there was an error processing your request.');
 }
 
 function startSpeechRecognition() {
@@ -109,6 +121,4 @@ function startSpeechRecognition() {
     };
 }
 
-document.getElementById('start-speech-recognition').addEventListener('click', function() {
-    startSpeechRecognition();
-});
+document.getElementById('start-speech-recognition').addEventListener('click', startSpeechRecognition);
