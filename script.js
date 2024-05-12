@@ -36,6 +36,41 @@ function initializeCamera() {
     }
 }
 
+document.getElementById('action-button').addEventListener('click', function() {
+    const userInputField = document.getElementById('user-input');
+    const userText = userInputField.value.trim().toLowerCase();
+    userInputField.value = ''; // Clear the input field right after the button is pressed
+
+    if (userText === "what do you see" || userText === "analyze the current view" || userText === "describe what's in front of you") {
+        captureAndAnalyzeImage(); // Handle vision-related commands
+    } else {
+        processUserInput(userText); // Handle other general commands or chat inputs
+    }
+});
+
+function captureAndAnalyzeImage() {
+    const video = document.getElementById('webcam');
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob(blob => {
+        const formData = new FormData();
+        formData.append('image', blob);
+        fetch('/analyze_image', { method: 'POST', body: formData })
+            .then(response => response.json())
+            .then(data => {
+                appendMessage('Jarvis', data.description);
+            })
+            .catch(error => {
+                console.error('Error analyzing image:', error);
+                appendMessage('Jarvis', 'Sorry, I encountered an error analyzing the image.');
+            });
+    });
+}
+
 function appendMessage(sender, message) {
     const chatBox = document.getElementById('jarvis-box');
     const messageElement = document.createElement('div');
@@ -58,15 +93,6 @@ function selectVoice() {
     var voices = window.speechSynthesis.getVoices();
     return voices.find(voice => voice.name === "Microsoft Ryan Online (Natural) - English (United Kingdom)") || voices[0];
 }
-
-document.getElementById('action-button').addEventListener('click', function() {
-    const userInputField = document.getElementById('user-input');
-    const userText = userInputField.value.trim();
-    if (userText) {
-        processUserInput(userText);
-        userInputField.value = ''; // Clear the input field right after the button is pressed
-    }
-});
 
 document.getElementById('user-input').addEventListener('keypress', function(event) {
     if (event.key === 'Enter') {
@@ -94,12 +120,7 @@ function sendToOpenAI(userInput) {
         },
         body: JSON.stringify({ user_input: userInput })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
         if (data.message) {
             appendMessage('jarvis', data.message);
@@ -119,7 +140,6 @@ function startSpeechRecognition() {
         const transcript = event.results[0][0].transcript;
         document.getElementById('user-input').value = transcript; // Display recognized speech in input field
         processUserInput(transcript);
-        document.getElementById('user-input').value = ''; // Clear the input field after processing
     };
 
     recognition.onerror = function(event) {
