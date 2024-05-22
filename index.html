@@ -24,6 +24,11 @@
     <div id="ObjectDetection" class="tabcontent">
         <h1>Object Detection</h1>
         <video id="webcam" autoplay playsinline width="640" height="480"></video>
+        <form id="uploadForm">
+            <input type="file" id="imageUpload" name="image" accept="image/*" required>
+            <button type="submit">Upload and Analyze</button>
+        </form>
+        <div id="objectsContainer"></div>
     </div>
 
     <div id="More" class="tabcontent">

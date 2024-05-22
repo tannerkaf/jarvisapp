@@ -48,6 +48,30 @@ document.getElementById('action-button').addEventListener('click', function() {
     }
 });
 
+document.getElementById('uploadForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    
+    const formData = new FormData();
+    const imageFile = document.getElementById('imageUpload').files[0];
+    formData.append('image', imageFile);
+
+    fetch('/analyze_image', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert('Error: ' + data.error);
+        } else {
+            displayObjects(data.objects);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+});
+
 function captureAndAnalyzeImage() {
     const video = document.getElementById('webcam');
     const canvas = document.createElement('canvas');
@@ -68,6 +92,16 @@ function captureAndAnalyzeImage() {
                 console.error('Error analyzing image:', error);
                 appendMessage('Jarvis', 'Sorry, I encountered an error analyzing the image.');
             });
+    });
+}
+
+function displayObjects(objects) {
+    const objectsContainer = document.getElementById('objectsContainer');
+    objectsContainer.innerHTML = '';
+    objects.forEach(obj => {
+        const objElement = document.createElement('div');
+        objElement.textContent = obj;
+        objectsContainer.appendChild(objElement);
     });
 }
 
