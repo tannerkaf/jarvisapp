@@ -62,7 +62,7 @@ function captureAndAnalyzeImage() {
         fetch('/analyze_image', { method: 'POST', body: formData })
             .then(response => response.json())
             .then(data => {
-                appendMessage('Jarvis', data.description);
+                appendMessage('Jarvis', data.objects.join(', '));
             })
             .catch(error => {
                 console.error('Error analyzing image:', error);
