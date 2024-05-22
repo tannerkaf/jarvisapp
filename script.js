@@ -72,6 +72,10 @@ document.getElementById('uploadForm').addEventListener('submit', function (e) {
     });
 });
 
+document.getElementById('analyze-live-button').addEventListener('click', function() {
+    captureAndAnalyzeImage();
+});
+
 function captureAndAnalyzeImage() {
     const video = document.getElementById('webcam');
     const canvas = document.createElement('canvas');
