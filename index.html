@@ -19,6 +19,7 @@
     <button onclick="window.location.href='index.html'" class="nav-button active">Chat</button>
     <button onclick="window.location.href='object-detection.html'" class="nav-button">Object Detection</button>
     <button onclick="toggleSettings()" class="nav-button">Settings</button>
+    <button onclick="toggleKC135()" class="nav-button">KC-135 Ref</button>
   </div>
 
   <!-- Main Content -->
@@ -54,6 +55,13 @@
         <input type="checkbox" id="voice-log-toggle" />
         Enable Voice Log
       </label>
+    </div>
+
+    <!-- KC-135 Panel -->
+    <div id="kc135-panel" class="panel hidden">
+      <h3>KC-135 Quick Reference</h3>
+      <input type="text" id="kc135-search" placeholder="Search KC-135 systems, TOs, tasks..." />
+      <div id="kc135-results"></div>
     </div>
 
     <!-- Loading Spinner -->
