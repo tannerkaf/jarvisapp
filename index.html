@@ -5,36 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jarvis Chatbot</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="tab">
-        <button class="tablinks" onclick="openTab(event, 'Chat')">Chat</button>
-        <button class="tablinks" onclick="openTab(event, 'ObjectDetection')">Object Detection</button>
-        <button class="tablinks" onclick="openTab(event, 'More')">More</button>
+    <div class="sidebar">
+        <h2>JARVIS</h2>
+        <button onclick="window.location.href='index.html'" class="nav-button active">Chat</button>
+        <button onclick="window.location.href='object-detection.html'" class="nav-button">Object Detection</button>
+        <button class="nav-button">Settings</button>
     </div>
 
-    <div id="Chat" class="tabcontent">
+    <div class="main-content">
         <h1>Jarvis Chatbot</h1>
         <div id="jarvis-box" class="chat-box"></div>
-        <input type="text" id="user-input" placeholder="Type a message...">
-        <button id="action-button">Send</button>
-        <button id="start-speech-recognition">Start Speech Recognition</button>
-    </div>
 
-    <div id="ObjectDetection" class="tabcontent">
-        <h1>Object Detection</h1>
-        <video id="webcam" autoplay playsinline width="640" height="480"></video>
-        <button id="analyze-live-button">Analyze Live</button>
-        <form id="uploadForm">
-            <input type="file" id="imageUpload" name="image" accept="image/*" required>
-            <button type="submit">Upload and Analyze</button>
-        </form>
-        <div id="objectsContainer"></div>
-    </div>
+        <div class="input-row">
+            <input type="text" id="user-input" placeholder="Type a message..." />
+            <button id="action-button">Send</button>
+        </div>
 
-    <div id="More" class="tabcontent">
-        <h1>More Information</h1>
-        <p>Additional content can go here.</p>
+        <button id="start-speech-recognition" class="secondary-button">Start Speech Recognition</button>
+
+        <div id="loading-indicator" style="display: none;">
+            <div class="loader"></div>
+        </div>
     </div>
 
     <script src="script.js"></script>
