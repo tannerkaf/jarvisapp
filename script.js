@@ -186,3 +186,33 @@ function startSpeechRecognition() {
 }
 
 document.getElementById('start-speech-recognition').addEventListener('click', startSpeechRecognition);
+// ENTER key triggers Send
+document.getElementById("user-input").addEventListener("keypress", function (e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        document.getElementById("action-button").click();
+    }
+});
+
+// Rebind speech recognition if broken
+document.getElementById("start-speech-recognition").addEventListener("click", () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert("Speech recognition not supported in this browser.");
+        return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.start();
+
+    recognition.onresult = function (event) {
+        const result = event.results[0][0].transcript;
+        document.getElementById("user-input").value = result;
+        document.getElementById("action-button").click();
+    };
+
+    recognition.onerror = function (event) {
+        console.error("Speech recognition error:", event.error);
+    };
+});
