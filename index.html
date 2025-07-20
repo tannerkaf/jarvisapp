@@ -1,36 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jarvis Chatbot</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jarvis Chatbot</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="sidebar">
-        <h2>JARVIS</h2>
-        <button onclick="window.location.href='index.html'" class="nav-button active">Chat</button>
-        <button onclick="window.location.href='object-detection.html'" class="nav-button">Object Detection</button>
-        <button class="nav-button">Settings</button>
+  <!-- Startup Screen -->
+  <div id="startup-screen">
+    <h1>Initializing J.A.R.V.I.S...</h1>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>JARVIS</h2>
+    <button onclick="window.location.href='index.html'" class="nav-button active">Chat</button>
+    <button onclick="window.location.href='object-detection.html'" class="nav-button">Object Detection</button>
+    <button onclick="toggleSettings()" class="nav-button">Settings</button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <h1>Jarvis Chatbot</h1>
+
+    <!-- Chat Container -->
+    <div id="jarvis-box" class="chat-box"></div>
+
+    <!-- Input Row -->
+    <div class="input-row">
+      <input type="text" id="user-input" placeholder="Type a message..." />
+      <button id="action-button">Send</button>
     </div>
 
-    <div class="main-content">
-        <h1>Jarvis Chatbot</h1>
-        <div id="jarvis-box" class="chat-box"></div>
+    <!-- Buttons -->
+    <button id="start-speech-recognition" class="secondary-button">Start Speech Recognition</button>
 
-        <div class="input-row">
-            <input type="text" id="user-input" placeholder="Type a message..." />
-            <button id="action-button">Send</button>
-        </div>
-
-        <button id="start-speech-recognition" class="secondary-button">Start Speech Recognition</button>
-
-        <div id="loading-indicator" style="display: none;">
-            <div class="loader"></div>
-        </div>
+    <!-- Voice Log -->
+    <div id="voice-log-panel" class="panel hidden">
+      <h3>Voice Log</h3>
+      <ul id="voice-log-list"></ul>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Settings Panel -->
+    <div id="settings-panel" class="panel hidden">
+      <h3>Settings</h3>
+      <label>
+        <input type="checkbox" id="glow-toggle" checked />
+        Enable Glow Effects
+      </label>
+      <label>
+        <input type="checkbox" id="voice-log-toggle" />
+        Enable Voice Log
+      </label>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading-indicator" style="display: none;">
+      <div class="loader"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>

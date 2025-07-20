@@ -1,36 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Object Detection - Jarvis</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Object Detection - Jarvis</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 </head>
 <body>
-    <div class="sidebar">
-        <h2>JARVIS</h2>
-        <button onclick="window.location.href='index.html'" class="nav-button">Chat</button>
-        <button onclick="window.location.href='object-detection.html'" class="nav-button active">Object Detection</button>
-        <button class="nav-button">Settings</button>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>JARVIS</h2>
+    <button onclick="window.location.href='index.html'" class="nav-button">Chat</button>
+    <button onclick="window.location.href='object-detection.html'" class="nav-button active">Object Detection</button>
+    <button onclick="toggleSettings()" class="nav-button">Settings</button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <h1>Object Detection</h1>
+
+    <!-- Webcam Area -->
+    <div id="webcam-container">
+      <video id="webcam" autoplay playsinline></video>
+      <canvas id="canvas"></canvas>
     </div>
 
-    <div class="main-content">
-        <h1>Object Detection</h1>
-
-        <div id="webcam-container">
-            <video id="webcam" autoplay playsinline></video>
-            <canvas id="canvas"></canvas>
-        </div>
-
-        <div class="input-row" style="justify-content: center; gap: 20px; flex-wrap: wrap;">
-            <button id="flip-camera">Flip Camera</button>
-            <button id="toggle-camera">Toggle Front/Back Camera</button>
-        </div>
+    <!-- Controls -->
+    <div class="input-row" style="justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 20px;">
+      <button id="flip-camera">Flip Camera</button>
+      <button id="toggle-camera">Toggle Front/Back</button>
+      <button id="toggle-detection">Toggle Detection</button>
+      <button id="save-snapshot">Save Snapshot</button>
+      <input type="file" id="image-upload" accept="image/*" />
     </div>
 
-    <script src="object-detection.js"></script>
+    <!-- Image Upload Preview -->
+    <canvas id="upload-canvas" style="margin-top: 20px; display: none; border: 2px solid #00ffcc; border-radius: 10px;"></canvas>
+  </div>
+
+  <script src="object-detection.js"></script>
 </body>
 </html>

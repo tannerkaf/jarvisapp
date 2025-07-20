@@ -1,201 +1,99 @@
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelector('.tablinks').click(); // Automatically click the first tab
-    if (window.speechSynthesis.onvoiceschanged !== undefined) {
-        window.speechSynthesis.onvoiceschanged = populateVoiceList;
-    }
-});
+let isMuted = false;
+let voiceLogEnabled = false;
+const synth = window.speechSynthesis;
+let jarvisVoice = null;
 
-function openTab(evt, tabName) {
-    var i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-    document.getElementById(tabName).style.display = "block";
-    evt.currentTarget.className += " active";
-
-    if (tabName === 'ObjectDetection') {
-        initializeCamera();
+// Lock to Microsoft Ryan UK voice
+function selectJarvisVoice() {
+    const voices = synth.getVoices();
+    jarvisVoice = voices.find(voice => voice.name.includes("Microsoft Ryan Online") || voice.name.includes("Ryan"));
+    if (!jarvisVoice) {
+        alert("Ryan voice not found. Please select it in your system TTS settings.");
     }
 }
 
-function initializeCamera() {
-    const video = document.getElementById('webcam');
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(function(stream) {
-                video.srcObject = stream;
-            })
-            .catch(function(error) {
-                console.error('Error accessing the webcam:', error);
-            });
+// Speak function with optional voice log
+function speak(text) {
+    if (isMuted || !jarvisVoice) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.voice = jarvisVoice;
+    synth.speak(utterance);
+
+    if (voiceLogEnabled) {
+        logToVoicePanel(text);
     }
 }
 
-document.getElementById('action-button').addEventListener('click', function() {
-    const userInputField = document.getElementById('user-input');
-    const userText = userInputField.value.trim().toLowerCase();
-    userInputField.value = ''; // Clear the input field right after the button is pressed
-
-    if (userText === "what do you see" || userText === "analyze the current view" || userText === "describe what's in front of you") {
-        captureAndAnalyzeImage(); // Handle vision-related commands
-    } else {
-        processUserInput(userText); // Handle other general commands or chat inputs
-    }
-});
-
-document.getElementById('uploadForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    
-    const formData = new FormData();
-    const imageFile = document.getElementById('imageUpload').files[0];
-    formData.append('image', imageFile);
-
-    fetch('/analyze_image', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            alert('Error: ' + data.error);
-        } else {
-            displayObjects(data.objects);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-});
-
-document.getElementById('analyze-live-button').addEventListener('click', function() {
-    captureAndAnalyzeImage();
-});
-
-function captureAndAnalyzeImage() {
-    const video = document.getElementById('webcam');
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const context = canvas.getContext('2d');
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    canvas.toBlob(blob => {
-        const formData = new FormData();
-        formData.append('image', blob);
-        fetch('/analyze_image', { method: 'POST', body: formData })
-            .then(response => response.json())
-            .then(data => {
-                appendMessage('Jarvis', data.objects.join(', '));
-            })
-            .catch(error => {
-                console.error('Error analyzing image:', error);
-                appendMessage('Jarvis', 'Sorry, I encountered an error analyzing the image.');
-            });
-    });
-}
-
-function displayObjects(objects) {
-    const objectsContainer = document.getElementById('objectsContainer');
-    objectsContainer.innerHTML = '';
-    objects.forEach(obj => {
-        const objElement = document.createElement('div');
-        objElement.textContent = obj;
-        objectsContainer.appendChild(objElement);
-    });
-}
-
+// Append message to chat
 function appendMessage(sender, message) {
-    const chatBox = document.getElementById('jarvis-box');
-    const messageElement = document.createElement('div');
+    const chatBox = document.getElementById("jarvis-box");
+    const messageElement = document.createElement("div");
+    messageElement.classList.add("message");
     messageElement.textContent = `${sender === 'user' ? 'You' : 'Jarvis'}: ${message}`;
     chatBox.appendChild(messageElement);
     chatBox.scrollTop = chatBox.scrollHeight;
-    if (sender === 'jarvis') {
-        speak(message);
-    }
 }
 
-function speak(text) {
-    var synth = window.speechSynthesis;
-    var utterance = new SpeechSynthesisUtterance(text);
-    utterance.voice = selectVoice();
-    synth.speak(utterance);
+// Stream-style typing simulation
+function streamMessage(text, callback) {
+    let index = 0;
+    const interval = setInterval(() => {
+        if (index < text.length) {
+            callback(text.slice(0, index + 1));
+            index++;
+        } else {
+            clearInterval(interval);
+        }
+    }, 25);
 }
 
-function selectVoice() {
-    var voices = window.speechSynthesis.getVoices();
-    return voices.find(voice => voice.name === "Microsoft Ryan Online (Natural) - English (United Kingdom)") || voices[0];
-}
-
-document.getElementById('user-input').addEventListener('keypress', function(event) {
-    if (event.key === 'Enter') {
-        event.preventDefault();
-        document.getElementById('action-button').click();
-    }
-});
-
-function processUserInput(userInput) {
-    appendMessage('user', userInput);
-
-    if (userInput.toLowerCase().includes('weather')) {
-        const city = userInput.split(' ').slice(1).join(' ');
-        getWeather(city);
-    } else {
-        sendToOpenAI(userInput);
-    }
-}
-
+// Send message to Flask backend
 function sendToOpenAI(userInput) {
-    fetch('http://localhost:5000/get_response', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+    appendMessage("user", userInput);
+
+    fetch("http://localhost:5000/get_response", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_input: userInput })
     })
     .then(response => response.json())
     .then(data => {
         if (data.message) {
-            appendMessage('jarvis', data.message);
+            let jarvisResponse = "";
+            streamMessage(data.message, (partial) => {
+                const existing = document.querySelector(".jarvis-stream");
+                if (existing) {
+                    existing.textContent = `Jarvis: ${partial}`;
+                } else {
+                    const streamEl = document.createElement("div");
+                    streamEl.classList.add("message", "jarvis-stream");
+                    streamEl.textContent = `Jarvis: ${partial}`;
+                    document.getElementById("jarvis-box").appendChild(streamEl);
+                }
+                document.getElementById("jarvis-box").scrollTop = document.getElementById("jarvis-box").scrollHeight;
+            });
+
+            speak(data.message);
+        } else {
+            appendMessage("jarvis", "Something went wrong.");
         }
     })
     .catch(error => {
-        console.error('Error:', error);
+        console.error("Error:", error);
+        appendMessage("jarvis", "An error occurred while processing your request.");
     });
 }
 
-function startSpeechRecognition() {
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = 'en-US';
-    recognition.start();
-
-    recognition.onresult = function(event) {
-        const transcript = event.results[0][0].transcript;
-        document.getElementById('user-input').value = transcript; // Display recognized speech in input field
-        processUserInput(transcript);
-    };
-
-    recognition.onerror = function(event) {
-        console.error('Speech recognition error:', event.error);
-    };
+// Voice log
+function logToVoicePanel(text) {
+    const logList = document.getElementById("voice-log-list");
+    const li = document.createElement("li");
+    li.textContent = text;
+    logList.appendChild(li);
 }
 
-document.getElementById('start-speech-recognition').addEventListener('click', startSpeechRecognition);
-// ENTER key triggers Send
-document.getElementById("user-input").addEventListener("keypress", function (e) {
-    if (e.key === "Enter") {
-        e.preventDefault();
-        document.getElementById("action-button").click();
-    }
-});
-
-// Rebind speech recognition if broken
-document.getElementById("start-speech-recognition").addEventListener("click", () => {
+// Speech recognition
+function startSpeechRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
         alert("Speech recognition not supported in this browser.");
@@ -206,13 +104,69 @@ document.getElementById("start-speech-recognition").addEventListener("click", ()
     recognition.lang = "en-US";
     recognition.start();
 
-    recognition.onresult = function (event) {
-        const result = event.results[0][0].transcript;
-        document.getElementById("user-input").value = result;
+    recognition.onresult = function(event) {
+        const speechResult = event.results[0][0].transcript;
+        document.getElementById("user-input").value = speechResult;
         document.getElementById("action-button").click();
     };
 
-    recognition.onerror = function (event) {
+    recognition.onerror = function(event) {
         console.error("Speech recognition error:", event.error);
     };
+}
+
+// UI Toggle
+function toggleSettings() {
+    const panel = document.getElementById("settings-panel");
+    panel.classList.toggle("hidden");
+}
+
+// Glow toggle
+document.addEventListener("DOMContentLoaded", () => {
+    // Enter key support
+    const input = document.getElementById("user-input");
+    input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            document.getElementById("action-button").click();
+        }
+    });
+
+    // Glow effect toggle
+    const glowToggle = document.getElementById("glow-toggle");
+    glowToggle.addEventListener("change", () => {
+        document.body.classList.toggle("no-glow", !glowToggle.checked);
+    });
+
+    // Voice log toggle
+    const voiceToggle = document.getElementById("voice-log-toggle");
+    voiceToggle.addEventListener("change", () => {
+        voiceLogEnabled = voiceToggle.checked;
+        const panel = document.getElementById("voice-log-panel");
+        panel.classList.toggle("hidden", !voiceToggle.checked);
+    });
+
+    // Speech button
+    document.getElementById("start-speech-recognition").addEventListener("click", startSpeechRecognition);
+
+    // Send button
+    document.getElementById("action-button").addEventListener("click", () => {
+        const inputField = document.getElementById("user-input");
+        const userText = inputField.value.trim();
+        if (userText) {
+            sendToOpenAI(userText);
+            inputField.value = "";
+        }
+    });
+
+    // Lock to Ryan voice
+    selectJarvisVoice();
+    synth.onvoiceschanged = selectJarvisVoice;
+
+    // Startup screen
+    const startup = document.getElementById("startup-screen");
+    setTimeout(() => {
+        startup.style.opacity = 0;
+        setTimeout(() => startup.style.display = "none", 1000);
+    }, 1800);
 });
