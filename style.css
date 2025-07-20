@@ -1,3 +1,4 @@
+/* === Base === */
 body {
     margin: 0;
     padding: 0;
@@ -9,6 +10,7 @@ body {
     overflow: hidden;
 }
 
+/* === Sidebar === */
 .sidebar {
     width: 200px;
     background: rgba(0, 255, 200, 0.05);
@@ -46,6 +48,7 @@ body {
     box-shadow: 0 0 10px #00ffcc;
 }
 
+/* === Main Content === */
 .main-content {
     flex: 1;
     padding: 40px;
@@ -61,6 +64,7 @@ h1 {
     margin-bottom: 20px;
 }
 
+/* === Chat Box === */
 .chat-box {
     background: rgba(0, 255, 200, 0.05);
     border: 1px solid #00ffcc22;
@@ -84,6 +88,7 @@ h1 {
     word-wrap: break-word;
 }
 
+/* === Inputs and Buttons === */
 .input-row {
     display: flex;
     gap: 10px;
@@ -126,6 +131,7 @@ button:hover {
     border: 1px solid #00ffcc33;
 }
 
+/* === Loader === */
 .loader {
     border: 5px solid #ccc;
     border-top: 5px solid #00ffcc;
@@ -139,4 +145,26 @@ button:hover {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* === Webcam Layout for Object Detection === */
+#webcam-container {
+    margin-top: 20px;
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    border: 2px solid #00ffcc;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#webcam {
+    width: 100%;
+    border-radius: 10px;
+}
+
+#canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
 }
