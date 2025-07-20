@@ -8,12 +8,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Startup Screen -->
   <div id="startup-screen">
     <h1>Initializing J.A.R.V.I.S...</h1>
   </div>
 
-  <!-- Sidebar -->
   <div class="sidebar">
     <h2>JARVIS</h2>
     <button onclick="window.location.href='index.html'" class="nav-button active">Chat</button>
@@ -22,49 +20,35 @@
     <button onclick="toggleKC135()" class="nav-button">KC-135 Ref</button>
   </div>
 
-  <!-- Main Content -->
   <div class="main-content">
     <h1>Jarvis Chatbot</h1>
 
-    <!-- Chat Container -->
     <div id="jarvis-box" class="chat-box"></div>
 
-    <!-- Input Row -->
     <div class="input-row">
       <input type="text" id="user-input" placeholder="Type a message..." />
       <button id="action-button">Send</button>
     </div>
 
-    <!-- Buttons -->
     <button id="start-speech-recognition" class="secondary-button">Start Speech Recognition</button>
 
-    <!-- Voice Log -->
     <div id="voice-log-panel" class="panel hidden">
       <h3>Voice Log</h3>
       <ul id="voice-log-list"></ul>
     </div>
 
-    <!-- Settings Panel -->
     <div id="settings-panel" class="panel hidden">
       <h3>Settings</h3>
-      <label>
-        <input type="checkbox" id="glow-toggle" checked />
-        Enable Glow Effects
-      </label>
-      <label>
-        <input type="checkbox" id="voice-log-toggle" />
-        Enable Voice Log
-      </label>
+      <label><input type="checkbox" id="glow-toggle" checked /> Enable Glow Effects</label>
+      <label><input type="checkbox" id="voice-log-toggle" /> Enable Voice Log</label>
     </div>
 
-    <!-- KC-135 Panel -->
     <div id="kc135-panel" class="panel hidden">
-      <h3>KC-135 Quick Reference</h3>
-      <input type="text" id="kc135-search" placeholder="Search KC-135 systems, TOs, tasks..." />
+      <h3>KC‑135 & Related Systems</h3>
+      <input type="text" id="kc135-search" placeholder="Search specs, TOs, avionics, etc..." />
       <div id="kc135-results"></div>
     </div>
 
-    <!-- Loading Spinner -->
     <div id="loading-indicator" style="display: none;">
       <div class="loader"></div>
     </div>
